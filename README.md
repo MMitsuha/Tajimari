@@ -29,7 +29,8 @@ Depends on `lazy-importer` to use `Windows API`
 1. Setup `Visual Studio`
 2. Install and integrate `vcpkg`
 3. Build `3rd_party/LIEF`
-3. Open the `.sln` file and enjoy it
+4. Tweak paths in `Tajimari Main`'s main.cpp
+5. Open the `.sln` file and enjoy it
 
 ## Donate 
 
