@@ -2,7 +2,7 @@
 
 the Open Source and Pure C++ Packer for eXecutables
 
-> `Tajimari` is currently a normal packer for **PE eXecutables**, it will soon become a VIRTUAL based packer.
+> `Tajimari` is currently a normal packer for **PE eXecutables**, it will soon become a `VIRTUAL` based packer.
 
 ## Overview
 
