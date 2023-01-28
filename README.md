@@ -33,8 +33,8 @@ Depends on `lazy-importer` to use `Windows API`
 
 ## Donate 
 
-![](https://github.com/WINKILLERS/WINKILLERS.github.io/blob/master/images/alipay.jpg =100)
-![](https://github.com/WINKILLERS/WINKILLERS.github.io/blob/master/images/wechat.png =100)
+![](https://github.com/WINKILLERS/WINKILLERS.github.io/blob/master/images/alipay.jpg)
+![](https://github.com/WINKILLERS/WINKILLERS.github.io/blob/master/images/wechat.png)
 
 ## Contact
 
