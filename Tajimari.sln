@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tajimari", "Tajimari\Tajimari.vcxproj", "{31A0D9B5-0D4C-4CCF-A615-EC446580A459}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3798D14C-B7FA-4C18-9693-AD45318E1BF4} = {3798D14C-B7FA-4C18-9693-AD45318E1BF4}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{6F0235C1-F2B4-419E-BE6F-6FB2D1E407E3}"
 	ProjectSection(SolutionItems) = preProject
@@ -11,6 +14,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		.github\workflows\msbuild.yml = .github\workflows\msbuild.yml
 		vcpkg.json = vcpkg.json
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rd_party", "3rd_party", "{29616CA4-F8AC-4C03-915C-1A4237940A25}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShellcodeTemplate", "ShellcodeTemplate\ShellcodeTemplate.vcxproj", "{3798D14C-B7FA-4C18-9693-AD45318E1BF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +35,14 @@ Global
 		{31A0D9B5-0D4C-4CCF-A615-EC446580A459}.Release|x64.Build.0 = Release|x64
 		{31A0D9B5-0D4C-4CCF-A615-EC446580A459}.Release|x86.ActiveCfg = Release|Win32
 		{31A0D9B5-0D4C-4CCF-A615-EC446580A459}.Release|x86.Build.0 = Release|Win32
+		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Debug|x64.ActiveCfg = Debug|x64
+		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Debug|x64.Build.0 = Debug|x64
+		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Debug|x86.ActiveCfg = Debug|Win32
+		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Debug|x86.Build.0 = Debug|Win32
+		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Release|x64.ActiveCfg = Release|x64
+		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Release|x64.Build.0 = Release|x64
+		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Release|x86.ActiveCfg = Release|Win32
+		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

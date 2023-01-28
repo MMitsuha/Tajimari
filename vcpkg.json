@@ -8,11 +8,15 @@
   "dependencies": [
     {
       "name": "lazy-importer",
-      "platform": "windows & static"
+      "platform": "windows"
     },
     {
       "name": "spdlog",
-      "platform": "windows & static"
+      "platform": "windows"
+    },
+    {
+      "name": "boost-leaf",
+      "platform": "windows"
     }
   ],
   "license": "AGPL-3.0-or-later"
