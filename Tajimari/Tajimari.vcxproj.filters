@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\PeMaster">
+      <UniqueIdentifier>{980d8aea-0ec4-4ed3-b010-8be4053f176d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\PeMaster">
+      <UniqueIdentifier>{228f3ddd-1e64-42b4-85c4-c09f64f99299}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -21,6 +27,27 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="PeMaster\PeMaster.cpp">
+      <Filter>源文件\PeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="PeMaster\DosHeader.cpp">
+      <Filter>源文件\PeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="PeMaster\BaseObject.cpp">
+      <Filter>源文件\PeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="PeMaster\NtHeaders.cpp">
+      <Filter>源文件\PeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="PeMaster\FileHeader.cpp">
+      <Filter>源文件\PeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="PeMaster\OptionalHeader.cpp">
+      <Filter>源文件\PeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="PeMaster\SectionHeader.cpp">
+      <Filter>源文件\PeMaster</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -28,6 +55,27 @@
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PeMaster\PeMaster.h">
+      <Filter>头文件\PeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="PeMaster\DosHeader.h">
+      <Filter>头文件\PeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="PeMaster\BaseObject.h">
+      <Filter>头文件\PeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="PeMaster\NtHeaders.h">
+      <Filter>头文件\PeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="PeMaster\FileHeader.h">
+      <Filter>头文件\PeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="PeMaster\OptionalHeader.h">
+      <Filter>头文件\PeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="PeMaster\SectionHeader.h">
+      <Filter>头文件\PeMaster</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

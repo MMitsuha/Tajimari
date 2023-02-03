@@ -71,22 +71,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
     <IncludePath>$(SolutionDir)3rd_party\LIEF\include\;$(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
     <IncludePath>$(SolutionDir)3rd_party\LIEF\include\;$(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
     <IncludePath>$(SolutionDir)3rd_party\LIEF\include\;$(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
     <IncludePath>$(SolutionDir)3rd_party\LIEF\include\;$(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
@@ -94,16 +94,16 @@
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(PlatformTarget)_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(VcpkgUseStatic)_$(PlatformTarget)_installed</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(PlatformTarget)_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(VcpkgUseStatic)_$(PlatformTarget)_installed</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(PlatformTarget)_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(VcpkgUseStatic)_$(PlatformTarget)_installed</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(PlatformTarget)_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(VcpkgUseStatic)_$(PlatformTarget)_installed</VcpkgInstalledDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -114,7 +114,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableModules>true</EnableModules>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,7 +122,7 @@
       <AdditionalDependencies>$(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.dll $(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</Command>
+      <Command>copy $(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.dll $(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -136,7 +136,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableModules>true</EnableModules>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,7 +146,7 @@
       <AdditionalDependencies>$(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.dll $(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</Command>
+      <Command>copy $(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.dll $(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -158,7 +158,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableModules>true</EnableModules>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -166,7 +166,7 @@
       <AdditionalDependencies>$(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.dll $(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</Command>
+      <Command>copy $(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.dll $(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -180,7 +180,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableModules>true</EnableModules>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -190,11 +190,23 @@
       <AdditionalDependencies>$(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.dll $(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</Command>
+      <Command>copy $(SolutionDir)3rd_party\LIEF\out\build\$(PlatformTarget)-$(Configuration)\LIEF.dll $(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PeMaster\BaseObject.cpp" />
+    <ClCompile Include="PeMaster\DosHeader.cpp" />
+    <ClCompile Include="PeMaster\FileHeader.cpp" />
+    <ClCompile Include="PeMaster\NtHeaders.cpp" />
+    <ClCompile Include="PeMaster\OptionalHeader.cpp" />
+    <ClCompile Include="PeMaster\PeMaster.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="PeMaster\SectionHeader.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -204,6 +216,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
+    <ClInclude Include="PeMaster\BaseObject.h" />
+    <ClInclude Include="PeMaster\DosHeader.h" />
+    <ClInclude Include="PeMaster\FileHeader.h" />
+    <ClInclude Include="PeMaster\NtHeaders.h" />
+    <ClInclude Include="PeMaster\OptionalHeader.h" />
+    <ClInclude Include="PeMaster\PeMaster.h" />
+    <ClInclude Include="PeMaster\SectionHeader.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

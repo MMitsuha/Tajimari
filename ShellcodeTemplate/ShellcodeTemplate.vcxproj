@@ -54,6 +54,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -72,46 +73,46 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-    <OutDir>$(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-    <OutDir>$(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-    <OutDir>$(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-    <OutDir>$(SolutionDir)Build\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <VcpkgUseStatic>false</VcpkgUseStatic>
+    <VcpkgUseStatic>true</VcpkgUseStatic>
     <VcpkgUseMD>false</VcpkgUseMD>
-    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(PlatformTarget)_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(VcpkgUseStatic)_$(PlatformTarget)_installed</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <VcpkgUseStatic>false</VcpkgUseStatic>
+    <VcpkgUseStatic>true</VcpkgUseStatic>
     <VcpkgUseMD>false</VcpkgUseMD>
-    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(PlatformTarget)_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(VcpkgUseStatic)_$(PlatformTarget)_installed</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <VcpkgUseStatic>false</VcpkgUseStatic>
+    <VcpkgUseStatic>true</VcpkgUseStatic>
     <VcpkgUseMD>false</VcpkgUseMD>
-    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(PlatformTarget)_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(VcpkgUseStatic)_$(PlatformTarget)_installed</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <VcpkgUseStatic>false</VcpkgUseStatic>
+    <VcpkgUseStatic>true</VcpkgUseStatic>
     <VcpkgUseMD>false</VcpkgUseMD>
-    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(PlatformTarget)_installed</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(SolutionDir)3rd_party\vcpkg\$(VcpkgUseStatic)_$(PlatformTarget)_installed</VcpkgInstalledDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -218,7 +219,13 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="entry.asm">
+      <FileType>Document</FileType>
+    </MASM>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>

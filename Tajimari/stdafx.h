@@ -12,8 +12,4 @@
 #include <conio.h>
 #include <winternl.h>
 
-#include <LIEF/LIEF.hpp>
-
 #include <spdlog/spdlog.h>
-
-#include <lazy_importer.hpp>
