@@ -62,6 +62,26 @@ namespace PeMaster {
 	}
 
 	void
+		OptionalHeader::copyToNoAlloc(
+			uint64_t offset,
+			size_t size
+		)
+	{
+		copyToNoAlloc(m_buffer, offset, size);
+	}
+
+	void
+		OptionalHeader::copyToNoAlloc(
+			Buffer& buffer,
+			uint64_t offset,
+			size_t size
+		)
+	{
+		auto pointer = reinterpret_cast<uint8_t*>(dynamic_cast<PIMAGE_OPTIONAL_HEADER>(this));
+		std::copy(pointer, pointer + size, buffer.begin() + offset);
+	}
+
+	void
 		OptionalHeader::copyFrom(
 			IMAGE_OPTIONAL_HEADER const* pointer,
 			size_t size

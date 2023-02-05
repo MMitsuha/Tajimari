@@ -48,6 +48,17 @@ namespace PeMaster {
 				uint32_t offset
 			);
 
+		size_t
+			copyToNoAlloc(
+				uint32_t offset
+			);
+
+		size_t
+			copyToNoAlloc(
+				Buffer& buffer,
+				uint32_t offset
+			);
+
 		virtual
 			~NtHeaders() = default;
 

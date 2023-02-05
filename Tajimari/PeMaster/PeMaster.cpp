@@ -398,6 +398,7 @@ namespace PeMaster {
 		auto& rNtHeaders = getNtHeaders();
 		auto& rSectionHeaders = getSectionHeaders();
 		size_t offset = 0;
+		size_t offsetHeaders = 0;
 
 		// Copy dos header
 		offset = rDosHeader.copyTo();
@@ -422,7 +423,11 @@ namespace PeMaster {
 			// Copy section header
 			offset = sec.copyHeaderTo(m_buffer, offset);
 		}
+		offsetHeaders = align_up(offset, rNtHeaders.getOptionalHeader().FileAlignment);
 		uint64_t rvaLastSectionEnd = 0;
+		uint32_t sizeOfCode = 0;
+		uint32_t sizeOfInitedData = 0;
+		uint32_t sizeOfUninitedData = 0;
 		for (auto& sec : rSectionHeaders) {
 			auto oldOffset = oldOffsets.front();
 			oldOffsets.pop();
@@ -443,6 +448,12 @@ namespace PeMaster {
 			if (updateRequired) {
 				sec.copyHeaderTo(m_buffer, oldOffset);
 			}
+			// Check if the section has code attribute and add to size of code
+			if (sec.Characteristics & IMAGE_SCN_CNT_CODE) sizeOfCode += sec.Misc.VirtualSize;
+			// Check if the section has initialized data attribute and add to size of initialized data
+			if (sec.Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) sizeOfInitedData += sec.Misc.VirtualSize;
+			// Check if the section has code attribute and add to size of code
+			if (sec.Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) sizeOfUninitedData += sec.Misc.VirtualSize;
 			// Copy section content
 			offset = sec.copyContentTo(m_buffer, sec.PointerToRawData);
 			// Update section header
@@ -450,7 +461,21 @@ namespace PeMaster {
 			rvaLastSectionEnd = sec.VirtualAddress + sec.Misc.VirtualSize;
 		}
 
-		// TODO: Update image size and code size
+		// Update sizes and checksum
+		rvaLastSectionEnd = align_up(rvaLastSectionEnd, rNtHeaders.getOptionalHeader().SectionAlignment);
+		sizeOfCode = align_up(sizeOfCode, rNtHeaders.getOptionalHeader().SectionAlignment);
+		sizeOfInitedData = align_up(sizeOfInitedData, rNtHeaders.getOptionalHeader().SectionAlignment);
+		sizeOfUninitedData = align_up(sizeOfUninitedData, rNtHeaders.getOptionalHeader().SectionAlignment);
+		rNtHeaders.getOptionalHeader().SizeOfImage = rvaLastSectionEnd;
+		rNtHeaders.getOptionalHeader().SizeOfCode = sizeOfCode;
+		rNtHeaders.getOptionalHeader().SizeOfInitializedData = sizeOfInitedData;
+		rNtHeaders.getOptionalHeader().SizeOfUninitializedData = sizeOfUninitedData;
+		rNtHeaders.getOptionalHeader().SizeOfHeaders = offsetHeaders;
+		rNtHeaders.getOptionalHeader().CheckSum = computeChecksum();
+		// Don't re-alloc
+		rNtHeaders.copyToNoAlloc(rDosHeader.e_lfanew);
+
+		// Update checksum
 
 		return true;
 	}
@@ -575,5 +600,37 @@ namespace PeMaster {
 		if (fo > m_buffer.size()) return false;
 
 		return true;
+	}
+
+	uint32_t
+		Pe::computeChecksum(
+			void
+		)
+	{
+		static const uint16_t posChecksum = 64;
+		static const uint32_t top = 0xFFFFFFFF;
+		uint64_t checksum = 0;
+		auto base = m_buffer.data();
+		for (size_t i = 0; i < m_buffer.size(); i += sizeof(uint32_t))
+		{
+			uint32_t dw = *reinterpret_cast<uint32_t*>(base + i);
+
+			//Skip "CheckSum" pos
+			if (i == posChecksum) continue;
+
+			// Calculate checksum
+			checksum = (checksum & 0xffffffff) + dw + (checksum >> 32);
+			if (checksum > top)
+				checksum = (checksum & 0xffffffff) + (checksum >> 32);
+		}
+
+		//Finish checksum
+		checksum = (checksum & 0xffff) + (checksum >> 16);
+		checksum = (checksum)+(checksum >> 16);
+		checksum = checksum & 0xffff;
+
+		checksum += m_buffer.size();
+
+		return static_cast<uint32_t>(checksum);
 	}
 }

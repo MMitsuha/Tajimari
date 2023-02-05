@@ -40,6 +40,19 @@ namespace PeMaster {
 				size_t size
 			);
 
+		void
+			copyToNoAlloc(
+				uint64_t offset,
+				size_t size
+			);
+
+		void
+			copyToNoAlloc(
+				Buffer& buffer,
+				uint64_t offset,
+				size_t size
+			);
+
 		virtual
 			~OptionalHeader() = default;
 

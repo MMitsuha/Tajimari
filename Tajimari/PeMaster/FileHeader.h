@@ -35,6 +35,17 @@ namespace PeMaster {
 				uint64_t offset
 			);
 
+		void
+			copyToNoAlloc(
+				uint64_t offset
+			);
+
+		void
+			copyToNoAlloc(
+				Buffer& buffer,
+				uint64_t offset
+			);
+
 		virtual
 			~FileHeader() = default;
 

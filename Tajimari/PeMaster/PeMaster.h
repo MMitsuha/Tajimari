@@ -251,6 +251,11 @@ namespace PeMaster {
 				uint64_t fo
 			);
 
+		uint32_t
+			computeChecksum(
+				void
+			);
+
 		virtual
 			~Pe() = default;
 

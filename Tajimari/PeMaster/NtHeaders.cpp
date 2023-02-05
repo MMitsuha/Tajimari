@@ -94,4 +94,29 @@ namespace PeMaster {
 
 		return offset + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + rFileHeader.SizeOfOptionalHeader;
 	}
+
+	size_t
+		NtHeaders::copyToNoAlloc(
+			uint32_t offset
+		)
+	{
+		return copyToNoAlloc(m_buffer, offset);
+	}
+
+	size_t
+		NtHeaders::copyToNoAlloc(
+			Buffer& buffer,
+			uint32_t offset
+		)
+	{
+		auto& rFileHeader = getFileHeader();
+		auto& rOptionalHeader = getOptionalHeader();
+
+		std::copy(reinterpret_cast<uint8_t*>(&Signature), reinterpret_cast<uint8_t*>(&Signature + 1), buffer.begin() + offset);
+
+		rFileHeader.copyToNoAlloc(buffer, offset + sizeof(DWORD));
+		rOptionalHeader.copyToNoAlloc(buffer, offset + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER), rFileHeader.SizeOfOptionalHeader);
+
+		return offset + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + rFileHeader.SizeOfOptionalHeader;
+	}
 }
