@@ -12,7 +12,7 @@ the Open Source and Pure C++ Packer for eXecutables
 
 ### Tajimari Main
 
-The main program
+The main program, contains `PeMaster`, which is the core of `Tajimari`, providing function like: PE parse, rebuild and etc.
 
 Pack a program and inject `ShellcodeTemplate` into it.
 
@@ -28,7 +28,6 @@ Depends on `lazy-importer` to use `Windows API`
 
 1. Setup `Visual Studio`
 2. Install and integrate `vcpkg`
-3. Build `3rd_party/LIEF`
 4. Tweak paths in `Tajimari Main`'s main.cpp
 5. Open the `.sln` file and enjoy it
 
