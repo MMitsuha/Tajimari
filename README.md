@@ -1,14 +1,14 @@
 # Tajimari
 
-the Open Source and Pure C++ Packer for eXecutables
+the Open Source and Pure C++ Packer for eXecutables.
 
 > `Tajimari` is currently a normal packer for **PE eXecutables**, it will soon become a `VIRTUAL` based packer.
 
 ## Overview
 
 `Tajimari` contains two project: 
- - The main program: `Tajimari Main`
- - The shellcode generator: `ShellcodeTemplate`
+ - The main program: `Tajimari Main`.
+ - The shellcode generator: `ShellcodeTemplate`.
 
 ### Tajimari Main
 
@@ -16,20 +16,43 @@ The main program, contains `PeMaster`, which is the core of `Tajimari`, providin
 
 Pack a program and inject `ShellcodeTemplate` into it.
 
+### PeMaster
+
+The PE lib providing parse, rebuild function
+
+#### Feature
+
+ - Fully OOP
+ - Fully C++
+ - Rebuild PE
+ - No dynamic memory allocation
+ - High code quality
+
 ### ShellcodeTemplate
 
-The shellcode generator using `MSVC`
+The shellcode generator using `MSVC`.
 
-Used as an alternative entry point for original program. There you can add some tweaks for the program itself or do some decryption for packer
+Used as an alternative entry point for original program. There you can add some tweaks for the program itself or do some decryption for packer.
 
-Depends on `lazy-importer` to use `Windows API`
+Depends on `lazy-importer` to use `Windows API`.
+
+NOTICE: DO NOT STATICALLY CALL AN WINDOWS API, it will remain in `import table` and can not run in injected environment!
 
 ## Build
 
-1. Setup `Visual Studio`
-2. Install and integrate `vcpkg`
-4. Tweak paths in `Tajimari Main`'s main.cpp
-5. Open the `.sln` file and enjoy it
+1. Setup `Visual Studio`.
+2. Install and integrate `vcpkg`.
+4. Tweak paths in `Tajimari Main`'s main.cpp.
+5. Open the `.sln` file and enjoy it.
+
+## Todo
+
+ - Virtualization support
+ - Better PE parse
+ - Rebuild import table
+ - Support dynamic base by relocation
+ - Parse rich header
+ - ...
 
 ## Donate 
 

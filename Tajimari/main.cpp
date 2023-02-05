@@ -11,15 +11,18 @@ wmain(
 	spdlog::set_level(spdlog::level::debug);
 
 	//std::string pathTarget = R"(C:\Windows\system32\kernel32.dll)";
-	std::string pathTarget = R"(C:\Windows\system32\notepad.exe)";
+	//std::string pathTarget = R"(C:\Windows\system32\notepad.exe)";
 	std::string pathTemplate = R"(.\ShellcodeTemplate.dll)";
-	//std::string pathTarget = R"(E:\upx\upx.exe)";
+	std::string pathTarget = R"(E:\upx\upx.exe)";
 	//std::string pathTarget = R"(E:\dllexp-x64\dllexp.exe)";
 	PeMaster::Pe objTemplate(pathTemplate);
 	PeMaster::Pe objTarget(pathTarget);
 
 	auto checksum = objTarget.computeChecksum();
 	spdlog::debug("Target checksum: 0x{:x}", checksum);
+
+	//auto imports = objTarget.enumImport();
+	//objTarget.setImport(imports);
 
 	// Get and copy the section
 	auto secText = objTemplate.getSectionByName(".text");

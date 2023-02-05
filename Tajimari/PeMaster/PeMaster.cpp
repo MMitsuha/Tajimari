@@ -200,6 +200,8 @@ namespace PeMaster {
 			void
 		)
 	{
+		// TODO: Support forwarder chain
+
 		Imports ret;
 		auto importDir = getNtHeaders().getOptionalHeader().DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
 		auto rva = importDir.VirtualAddress;
@@ -213,9 +215,12 @@ namespace PeMaster {
 		auto pImport = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(base + rvaToFo(rva));
 
 		while (pImport->Name) {
+			ImportEntry entry;
 			std::string name = reinterpret_cast<char*>(base + rvaToFo(pImport->Name));
 			auto pThunk = reinterpret_cast<PIMAGE_THUNK_DATA>(base + rvaToFo(pImport->FirstThunk));
 			spdlog::debug("In {}:", name);
+			entry.DllName = std::move(name);
+			entry.IsBound = pImport->TimeDateStamp == -1;
 
 			while (pThunk->u1.Function) {
 				Import data{};
@@ -232,11 +237,11 @@ namespace PeMaster {
 				}
 
 				data.Thunk = *pThunk;
-				ret.emplace_back(std::move(data));
-
+				entry.Table.emplace_back(std::move(data));
 				pThunk++;
 			}
 
+			ret.emplace_back(std::move(entry));
 			pImport++;
 		}
 
@@ -388,6 +393,109 @@ namespace PeMaster {
 	//	Pe write
 	//
 
+	void
+		Pe::setImport(
+			Imports& imports
+		)
+	{
+		// TODO: Support forwarder chain
+		// Generate a new section
+		SectionHeader secImport;
+		auto& secAdded = getSectionHeaders().emplace_back(secImport);
+		// Set name
+		secAdded.Name[0] = '.';
+		secAdded.Name[1] = 'i';
+
+		// Get information
+		auto& content = secAdded.m_content;
+		auto& importDir = getNtHeaders().getOptionalHeader().DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+		auto& rva = importDir.VirtualAddress;
+		auto& size = importDir.Size;
+
+		// Get size
+		uint64_t sizeOfDescriptors = imports.size() * sizeof(IMAGE_IMPORT_DESCRIPTOR);
+		uint64_t sizeOfNames = 0;
+		uint64_t sizeOfByNames = 0;
+		uint64_t sizeOfThunks = 0;
+
+		for (const auto& entry : imports) {
+			sizeOfNames += entry.DllName.size() + 1;
+			sizeOfThunks += sizeof(IMAGE_THUNK_DATA) * entry.Table.size();
+
+			for (const auto& imp : entry.Table) {
+				// Filter functions imported by name
+				if ((imp.Thunk.u1.Function & IMAGE_ORDINAL_FLAG) == 0) {
+					sizeOfByNames += imp.ByName.Name.size() + 1 + sizeof(WORD);
+				}
+			}
+		}
+
+		sizeOfDescriptors += sizeof(IMAGE_IMPORT_DESCRIPTOR);
+		sizeOfThunks += imports.size() * sizeof(IMAGE_THUNK_DATA);
+
+		auto total = sizeOfDescriptors + sizeOfNames + sizeOfByNames + sizeOfThunks * 2;
+		auto totalFAligned = align_up(total, getNtHeaders().getOptionalHeader().FileAlignment);
+		auto totalSAligned = align_up(total, getNtHeaders().getOptionalHeader().SectionAlignment);
+		content.resize(totalFAligned);
+		secAdded.SizeOfRawData = totalFAligned;
+		secAdded.Misc.VirtualSize = totalSAligned;
+
+		rebuild();
+		rva = secAdded.VirtualAddress;
+		size = total;
+
+		auto pDescriptorStart = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(content.data());
+		for (const auto& entry : imports) {
+			pDescriptorStart->ForwarderChain = 0;
+			pDescriptorStart->TimeDateStamp = entry.IsBound ? -1 : 0;
+
+			pDescriptorStart++;
+		}
+
+		size_t i = 0;
+		pDescriptorStart = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(content.data());
+		auto pDllNameStart = content.data() + sizeOfDescriptors + sizeOfThunks * 2;
+		for (const auto& entry : imports) {
+			pDescriptorStart[i].Name = pDllNameStart - content.data() + rva;
+			std::copy(entry.DllName.cbegin(), entry.DllName.cend(), pDllNameStart);
+			pDllNameStart += entry.DllName.size() + 1;
+
+			i++;
+		}
+
+		i = 0;
+		size_t j = 0;
+		pDescriptorStart = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(content.data());
+		auto pThunkStart = reinterpret_cast<PIMAGE_THUNK_DATA>(content.data() + sizeOfDescriptors);
+		auto pOThunkStart = reinterpret_cast<PIMAGE_THUNK_DATA>(content.data() + sizeOfDescriptors + sizeOfThunks);
+		auto pByNameStart = content.data() + sizeOfDescriptors + sizeOfThunks * 2 + sizeOfNames;
+		for (const auto& entry : imports) {
+			pDescriptorStart[i].FirstThunk = reinterpret_cast<uint8_t*>(&pThunkStart[j]) - content.data() + rva;
+			//pDescriptorStart[i].OriginalFirstThunk = reinterpret_cast<uint8_t*>(&pOThunkStart[j]) - content.data() + rva;
+			for (const auto& imp : entry.Table) {
+				// Filter functions imported by name
+				if ((imp.Thunk.u1.Function & IMAGE_ORDINAL_FLAG) == 0) {
+					pThunkStart[j].u1.Function = pByNameStart - content.data() + rva;
+					//pOThunkStart[j].u1.Function = pByNameStart - content.data() + rva;
+
+					*reinterpret_cast<WORD*>(pByNameStart) = imp.ByName.Hint;
+					memcpy(pByNameStart + sizeof(WORD), imp.ByName.Name.data(), imp.ByName.Name.size());
+					//pByNameStart += sizeof(WORD) + imp.ByName.Name.size() + 1;
+					pByNameStart += sizeof(WORD) + imp.ByName.Name.size();
+					//if (reinterpret_cast<uint64_t>(pByNameStart) % 2 != 0) pByNameStart++;
+
+					j++;
+				}
+			}
+
+			// Leave a blank thunk
+			j++;
+			i++;
+		}
+
+		rebuild();
+	}
+
 	bool
 		Pe::rebuild(
 			void
@@ -445,9 +553,7 @@ namespace PeMaster {
 				updateRequired = true;
 			}
 			// If we modified the header, we must write it back
-			if (updateRequired) {
-				sec.copyHeaderTo(m_buffer, oldOffset);
-			}
+			if (updateRequired)  sec.copyHeaderTo(m_buffer, oldOffset);
 			// Check if the section has code attribute and add to size of code
 			if (sec.Characteristics & IMAGE_SCN_CNT_CODE) sizeOfCode += sec.Misc.VirtualSize;
 			// Check if the section has initialized data attribute and add to size of initialized data

@@ -101,7 +101,13 @@ namespace PeMaster {
 			} ByName;
 		} Import, * PImport;
 
-		using Imports = std::vector<Import>;
+		typedef struct _IMPORT_ENTRY {
+			std::string DllName;
+			bool IsBound;
+			std::vector<Import> Table;
+		} ImportEntry, * PImportEntry;
+
+		using Imports = std::vector<ImportEntry>;
 		Imports
 			enumImport(
 				void
@@ -186,6 +192,11 @@ namespace PeMaster {
 		//
 		//	Pe write
 		//
+
+		void
+			setImport(
+				Imports& imports
+			);
 
 		bool
 			rebuild(
