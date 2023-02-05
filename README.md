@@ -1,4 +1,10 @@
-# Tajimari
+﻿# Tajimari
+
+> ⚠**WARNING**⚠
+> Because the god damn education in China (especially in senior high school),
+> I have to **SUSPEND** the development, I am absent from the Internet from
+> Monday to Saturday (UTC +8), I may response issues and PR slower.
+> Thanks for supporting, hope to see you again soon!
 
 the Open Source and Pure C++ Packer for eXecutables.
 
