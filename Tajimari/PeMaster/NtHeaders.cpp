@@ -2,11 +2,11 @@
 
 namespace PeMaster {
 	NtHeaders::NtHeaders(
-		LONG offset
+		uint32_t offset
 	)
 	{
 		spdlog::debug("Nt headers constructed with offset: {}.", offset);
-		this->NtHeaders::open(offset);
+		open(offset);
 	}
 
 	void
@@ -15,12 +15,12 @@ namespace PeMaster {
 		)
 	{
 		spdlog::debug("Building nt headers with base object and offset: {}.", offset);
-		this->NtHeaders::open(m_buffer, offset);
+		open(m_buffer, offset);
 	}
 
 	void
 		NtHeaders::open(
-			const std::vector<uint8_t>& buffer,
+			const Buffer& buffer,
 			uint32_t offset
 		)
 	{
@@ -53,19 +53,45 @@ namespace PeMaster {
 		m_valid = true;
 	}
 
-	FileHeader*
+	FileHeader&
 		NtHeaders::getFileHeader(
 			void
 		)
 	{
-		return dynamic_cast<FileHeader*>(this);
+		return dynamic_cast<FileHeader&>(*this);
 	}
 
-	OptionalHeader*
+	OptionalHeader&
 		NtHeaders::getOptionalHeader(
 			void
 		)
 	{
-		return dynamic_cast<OptionalHeader*>(this);
+		return dynamic_cast<OptionalHeader&>(*this);
+	}
+
+	size_t
+		NtHeaders::copyTo(
+			uint32_t offset
+		)
+	{
+		return copyTo(m_buffer, offset);
+	}
+
+	size_t
+		NtHeaders::copyTo(
+			Buffer& buffer,
+			uint32_t offset
+		)
+	{
+		auto& rFileHeader = getFileHeader();
+		auto& rOptionalHeader = getOptionalHeader();
+
+		buffer.resize(offset + sizeof(DWORD));
+		std::copy(reinterpret_cast<uint8_t*>(&Signature), reinterpret_cast<uint8_t*>(&Signature + 1), buffer.begin() + offset);
+
+		rFileHeader.copyTo(buffer, offset + sizeof(DWORD));
+		rOptionalHeader.copyTo(buffer, offset + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER), rFileHeader.SizeOfOptionalHeader);
+
+		return offset + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + rFileHeader.SizeOfOptionalHeader;
 	}
 }

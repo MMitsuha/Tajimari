@@ -2,28 +2,28 @@
 
 namespace PeMaster {
 	OptionalHeader::OptionalHeader(
-		uint32_t offset,
+		uint64_t offset,
 		size_t size
 	)
 	{
 		spdlog::debug("Optional header constructed with offset: {} and size: {}.", offset, size);
-		this->OptionalHeader::open(offset, size);
+		open(offset, size);
 	}
 
 	void
 		OptionalHeader::open(
-			uint32_t offset,
+			uint64_t offset,
 			size_t size
 		)
 	{
 		spdlog::debug("Building optional header with base object and offset: {} and size: {}.", offset, size);
-		this->OptionalHeader::open(m_buffer, offset, size);
+		open(m_buffer, offset, size);
 	}
 
 	void
 		OptionalHeader::open(
-			const std::vector<uint8_t>& buffer,
-			uint32_t offset,
+			const Buffer& buffer,
+			uint64_t offset,
 			size_t size
 		)
 	{
@@ -36,8 +36,29 @@ namespace PeMaster {
 		const auto pOptionalHeader = reinterpret_cast<IMAGE_OPTIONAL_HEADER const*>(buffer.data() + offset);
 
 		// Copy to myself
-		this->copyFrom(pOptionalHeader, size);
+		copyFrom(pOptionalHeader, size);
 		m_valid = true;
+	}
+
+	void
+		OptionalHeader::copyTo(
+			uint64_t offset,
+			size_t size
+		)
+	{
+		copyTo(m_buffer, offset, size);
+	}
+
+	void
+		OptionalHeader::copyTo(
+			Buffer& buffer,
+			uint64_t offset,
+			size_t size
+		)
+	{
+		auto pointer = reinterpret_cast<uint8_t*>(dynamic_cast<PIMAGE_OPTIONAL_HEADER>(this));
+		buffer.resize(offset + size);
+		std::copy(pointer, pointer + size, buffer.begin() + offset);
 	}
 
 	void

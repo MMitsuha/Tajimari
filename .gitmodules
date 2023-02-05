@@ -1,3 +1,0 @@
-[submodule "3rd_party/LIEF"]
-	path = 3rd_party/LIEF
-	url = https://github.com/lief-project/LIEF.git

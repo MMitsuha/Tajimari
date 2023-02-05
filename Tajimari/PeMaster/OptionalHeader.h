@@ -10,22 +10,33 @@ namespace PeMaster {
 	public:
 		OptionalHeader() = default;
 		OptionalHeader(
-			uint32_t offset,
+			uint64_t offset,
 			size_t size
 		);
 
-		virtual
-			void
+		void
 			open(
-				uint32_t offset,
+				uint64_t offset,
 				size_t size
 			);
 
-		virtual
-			void
+		void
 			open(
-				const std::vector<uint8_t>& buffer,
-				uint32_t offset,
+				const Buffer& buffer,
+				uint64_t offset,
+				size_t size
+			);
+
+		void
+			copyTo(
+				uint64_t offset,
+				size_t size
+			);
+
+		void
+			copyTo(
+				Buffer& buffer,
+				uint64_t offset,
 				size_t size
 			);
 

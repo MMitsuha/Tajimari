@@ -1,32 +1,16 @@
 #include "PeMaster.h"
 #include <fstream>
 #include <tuple>
+#include <queue>
 #include <spdlog/spdlog.h>
 
 namespace PeMaster {
 	Pe::Pe(
 		const std::filesystem::path& path
-	) :BaseObject(path)
+	)
 	{
 		spdlog::debug("Pe constructed.");
-		auto pDosHeader = getDosHeader();
-
-		// Initialize dos stub
-		std::copy(this->m_buffer.cbegin() + sizeof(IMAGE_DOS_HEADER),
-			this->m_buffer.cbegin() + pDosHeader->e_lfanew,
-			std::back_inserter(m_DosStub));
-
-		// Initialize nt headers
-		auto pNtHeaders = getNtHeaders();
-		pNtHeaders->NtHeaders::open(pDosHeader->e_lfanew);
-
-		// Initialize section headers
-		m_SectionHeaders.resize(pNtHeaders->getFileHeader()->NumberOfSections);
-		for (size_t i = 0; i < pNtHeaders->getFileHeader()->NumberOfSections; i++) {
-			m_SectionHeaders[i].SectionHeader::open(m_buffer, pDosHeader->e_lfanew // At the beginning of nt headers
-				+ sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + pNtHeaders->getFileHeader()->SizeOfOptionalHeader // At the beginning of section headers
-				+ i * sizeof(IMAGE_SECTION_HEADER));
-		}
+		open(path);
 	}
 
 	bool
@@ -36,62 +20,50 @@ namespace PeMaster {
 	{
 		spdlog::debug("Building pe with given path.");
 		// Initialize base object
-		auto pBaseObject = asBaseObject();
-		auto ret = pBaseObject->BaseObject::open(path);
+		auto& rBaseObject = asBaseObject();
+		auto ret = rBaseObject.open(path);
 
-		// Initialize dos header
-		auto pDosHeader = getDosHeader();
-		pDosHeader->DosHeader::open();
-
-		// Initialize dos stub
-		std::copy(this->m_buffer.cbegin() + sizeof(IMAGE_DOS_HEADER),
-			this->m_buffer.cbegin() + pDosHeader->e_lfanew,
-			std::back_inserter(m_DosStub));
-
-		// Initialize nt headers
-		auto pNtHeaders = getNtHeaders();
-		pNtHeaders->NtHeaders::open(pDosHeader->e_lfanew);
-
-		// Initialize section headers
-		m_SectionHeaders.resize(pNtHeaders->getFileHeader()->NumberOfSections);
-		for (size_t i = 0; i < pNtHeaders->getFileHeader()->NumberOfSections; i++) {
-			m_SectionHeaders[i].SectionHeader::open(m_buffer, pDosHeader->e_lfanew // At the beginning of nt headers
-				+ sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + pNtHeaders->getFileHeader()->SizeOfOptionalHeader // At the beginning of section headers
-				+ i * sizeof(IMAGE_SECTION_HEADER));
-		}
+		open();
 
 		return ret;
 	}
 
 	void
 		Pe::open(
-			const std::vector<uint8_t>& buffer
+			const Buffer& buffer
 		)
 	{
 		spdlog::debug("Building pe with given buffer.");
 		// Initialize base object
-		auto pBaseObject = asBaseObject();
-		pBaseObject->BaseObject::open(buffer);
+		auto& rBaseObject = asBaseObject();
+		rBaseObject.open(buffer);
 
+		open();
+	}
+
+	void
+		Pe::open(
+			void
+		)
+	{
 		// Initialize dos header
-		auto pDosHeader = getDosHeader();
-		pDosHeader->DosHeader::open();
-
-		// Initialize dos stub
-		std::copy(this->m_buffer.cbegin() + sizeof(IMAGE_DOS_HEADER),
-			this->m_buffer.cbegin() + pDosHeader->e_lfanew,
-			std::back_inserter(m_DosStub));
+		auto& rDosHeader = getDosHeader();
+		rDosHeader.open();
 
 		// Initialize nt headers
-		auto pNtHeaders = getNtHeaders();
-		pNtHeaders->NtHeaders::open(pDosHeader->e_lfanew);
+		auto& rNtHeaders = getNtHeaders();
+		rNtHeaders.open(rDosHeader.e_lfanew);
 
 		// Initialize section headers
-		m_SectionHeaders.resize(pNtHeaders->getFileHeader()->NumberOfSections);
-		for (size_t i = 0; i < pNtHeaders->getFileHeader()->NumberOfSections; i++) {
-			m_SectionHeaders[i].SectionHeader::open(m_buffer, pDosHeader->e_lfanew // At the beginning of nt headers
-				+ sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + pNtHeaders->getFileHeader()->SizeOfOptionalHeader // At the beginning of section headers
+		WORD i = 0;
+		auto& rSectionHeaders = getSectionHeaders();
+		rSectionHeaders.resize(rNtHeaders.getFileHeader().NumberOfSections);
+		for (auto& sec : rSectionHeaders) {
+			sec.open(m_buffer, rDosHeader.e_lfanew // At the beginning of nt headers
+				+ sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + rNtHeaders.getFileHeader().SizeOfOptionalHeader // At the beginning of section headers
 				+ i * sizeof(IMAGE_SECTION_HEADER));
+
+			i++;
 		}
 	}
 
@@ -103,39 +75,39 @@ namespace PeMaster {
 		return m_valid;
 	}
 
-	DosHeader*
+	DosHeader&
 		Pe::getDosHeader(
 			void
 		)
 	{
-		return dynamic_cast<DosHeader*>(this);
+		return dynamic_cast<DosHeader&>(*this);
 	}
 
-	NtHeaders*
+	NtHeaders&
 		Pe::getNtHeaders(
 			void
 		)
 	{
-		return dynamic_cast<NtHeaders*>(this);
+		return dynamic_cast<NtHeaders&>(*this);
 	}
 
-	std::vector<SectionHeader>*
+	SectionHeaders&
 		Pe::getSectionHeaders(
 			void
 		)
 	{
-		return &m_SectionHeaders;
+		return dynamic_cast<SectionHeaders&>(*this);
 	}
 
-	BaseObject*
+	BaseObject&
 		Pe::asBaseObject(
 			void
 		)
 	{
-		return dynamic_cast<BaseObject*>(this);
+		return dynamic_cast<BaseObject&>(*this);
 	}
 
-	SectionHeader
+	SectionHeader&
 		Pe::getSectionByVa(
 			uint64_t va
 		)
@@ -145,43 +117,45 @@ namespace PeMaster {
 		return getSectionByRva(rva);
 	}
 
-	SectionHeader
+	SectionHeader&
 		Pe::getSectionByRva(
 			uint64_t rva
 		)
 	{
-		for (const auto& sec : m_SectionHeaders) {
+		auto& rSectionHeaders = getSectionHeaders();
+		for (const auto& sec : rSectionHeaders) {
 			if (rva == std::clamp(rva, static_cast<uint64_t>(sec.VirtualAddress),
-				static_cast<uint64_t>(sec.VirtualAddress + sec.Misc.VirtualSize))) return sec;
+				static_cast<uint64_t>(sec.VirtualAddress + sec.Misc.VirtualSize))) return const_cast<SectionHeader&>(sec);
 		}
 
-		return {};
+		throw std::out_of_range("No section matched given RVA.");
 	}
 
-	SectionHeader
+	SectionHeader&
 		Pe::getSectionByFo(
 			uint64_t fo
 		)
 	{
-		for (const auto& sec : m_SectionHeaders) {
+		auto& rSectionHeaders = getSectionHeaders();
+		for (const auto& sec : rSectionHeaders) {
 			if (fo == std::clamp(fo, static_cast<uint64_t>(sec.PointerToRawData),
-				static_cast<uint64_t>(sec.PointerToRawData + sec.SizeOfRawData))) return sec;
+				static_cast<uint64_t>(sec.PointerToRawData + sec.SizeOfRawData))) return const_cast<SectionHeader&>(sec);
 		}
 
-		return {};
+		throw std::out_of_range("No section matched given FO.");
 	}
 
 	//
 	//	Pe read: enumerate data dictionary
 	//
 
-	std::vector<std::tuple<uint16_t, std::string, void*>>
+	Pe::Exports
 		Pe::enumExport(
 			void
 		)
 	{
-		std::vector<std::tuple<uint16_t, std::string, void*>> ret;
-		auto importDir = getNtHeaders()->getOptionalHeader()->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+		Exports ret;
+		auto importDir = getNtHeaders().getOptionalHeader().DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
 		auto rva = importDir.VirtualAddress;
 		auto size = importDir.Size;
 
@@ -208,13 +182,13 @@ namespace PeMaster {
 		return ret;
 	}
 
-	std::vector<std::pair<std::string, std::vector<std::tuple<IMAGE_THUNK_DATA, std::string, WORD>>>>
+	Pe::Imports
 		Pe::enumImport(
 			void
 		)
 	{
-		std::vector<std::pair<std::string, std::vector<std::tuple<IMAGE_THUNK_DATA, std::string, WORD>>>> ret;
-		auto importDir = getNtHeaders()->getOptionalHeader()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+		Imports ret;
+		auto importDir = getNtHeaders().getOptionalHeader().DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
 		auto rva = importDir.VirtualAddress;
 		auto size = importDir.Size;
 
@@ -367,6 +341,77 @@ namespace PeMaster {
 	}
 
 	//
+	//	Pe write
+	//
+
+	bool
+		Pe::rebuild(
+			void
+		)
+	{
+		m_buffer.clear();
+		auto& rDosHeader = getDosHeader();
+		auto& rNtHeaders = getNtHeaders();
+		auto& rSectionHeaders = getSectionHeaders();
+		size_t offset = 0;
+
+		// Copy dos header
+		offset = rDosHeader.copyTo();
+		// Update dos header
+		rDosHeader.open();
+		// Check e_lfanew
+		if (rDosHeader.e_lfanew < offset) {
+			spdlog::warn("Nt headers overwrite dos header field.");
+		}
+
+		// Copy nt headers
+		offset = rNtHeaders.copyTo(rDosHeader.e_lfanew);
+		// Update nt headers
+		rNtHeaders.open(rDosHeader.e_lfanew);
+
+		std::queue<uint64_t> oldOffsets;
+		for (auto& sec : rSectionHeaders) {
+			// Backup offset
+			oldOffsets.push(offset);
+			// Copy section header
+			offset = sec.copyHeaderTo(m_buffer, offset);
+		}
+		for (auto& sec : rSectionHeaders) {
+			// Copy section content
+			offset = sec.copyContentTo(m_buffer, sec.PointerToRawData, rNtHeaders.getOptionalHeader().FileAlignment);
+			// Update section header
+			sec.open(m_buffer, oldOffsets.front());
+			oldOffsets.pop();
+		}
+
+		return true;
+	}
+
+	bool
+		Pe::write(
+			const std::filesystem::path& path
+		)
+	{
+		if (!m_valid) return false;
+
+		std::ofstream file(path, std::ios_base::binary);
+
+		if (!file.is_open()) return false;
+
+		std::copy(m_buffer.cbegin(), m_buffer.cend(), std::ostreambuf_iterator<char>(file));
+		return true;
+	}
+
+	void
+		Pe::write(
+			Buffer& buffer
+		)
+	{
+		buffer.clear();
+		std::copy(m_buffer.cbegin(), m_buffer.cend(), buffer.begin());
+	}
+
+	//
 	//	Offset Translate
 	//
 
@@ -375,10 +420,10 @@ namespace PeMaster {
 			uint64_t va
 		)
 	{
-		auto vaEntry = getNtHeaders()->getOptionalHeader()->AddressOfEntryPoint;
+		auto vaEntry = getNtHeaders().getOptionalHeader().AddressOfEntryPoint;
 
 		if (va < vaEntry) {
-			throw std::out_of_range("Address is not in process's virtual range.");
+			spdlog::error("Virtual address: 0x{:x} is not in process's memory range.", va);
 		}
 
 		return va - vaEntry;
@@ -387,9 +432,9 @@ namespace PeMaster {
 	uint64_t
 		Pe::rvaToVa(
 			uint64_t rva
-		) noexcept
+		)
 	{
-		auto vaEntry = getNtHeaders()->getOptionalHeader()->AddressOfEntryPoint;
+		auto vaEntry = getNtHeaders().getOptionalHeader().AddressOfEntryPoint;
 
 		return rva + vaEntry;
 	}
@@ -399,7 +444,7 @@ namespace PeMaster {
 			uint64_t fo
 		)
 	{
-		auto sec = getSectionByFo(fo);
+		auto& sec = getSectionByFo(fo);
 
 		return fo - sec.PointerToRawData + sec.VirtualAddress;
 	}
@@ -409,7 +454,7 @@ namespace PeMaster {
 			uint64_t rva
 		)
 	{
-		auto sec = getSectionByRva(rva);
+		auto& sec = getSectionByRva(rva);
 
 		return rva - sec.VirtualAddress + sec.PointerToRawData;
 	}
@@ -419,7 +464,7 @@ namespace PeMaster {
 			uint64_t fo
 		)
 	{
-		auto sec = getSectionByFo(fo);
+		auto& sec = getSectionByFo(fo);
 
 		return rvaToVa(fo - sec.PointerToRawData + sec.VirtualAddress);
 	}
@@ -429,7 +474,7 @@ namespace PeMaster {
 			uint64_t va
 		)
 	{
-		auto sec = getSectionByVa(va);
+		auto& sec = getSectionByVa(va);
 
 		return vaToRva(va) - sec.VirtualAddress + sec.PointerToRawData;
 	}

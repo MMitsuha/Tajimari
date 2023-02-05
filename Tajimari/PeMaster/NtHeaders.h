@@ -13,30 +13,39 @@ namespace PeMaster {
 	public:
 		NtHeaders() = default;
 		NtHeaders(
-			LONG offset
+			uint32_t offset
 		);
 
-		virtual
-			void
+		void
 			open(
 				uint32_t offset
 			);
 
-		virtual
-			void
+		void
 			open(
-				const std::vector<uint8_t>& buffer,
+				const Buffer& buffer,
 				uint32_t offset
 			);
 
-		FileHeader*
+		FileHeader&
 			getFileHeader(
 				void
 			);
 
-		OptionalHeader*
+		OptionalHeader&
 			getOptionalHeader(
 				void
+			);
+
+		size_t
+			copyTo(
+				uint32_t offset
+			);
+
+		size_t
+			copyTo(
+				Buffer& buffer,
+				uint32_t offset
 			);
 
 		virtual

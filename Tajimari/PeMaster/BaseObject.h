@@ -4,6 +4,8 @@
 #include <filesystem>
 
 namespace PeMaster {
+	using Buffer = std::vector<uint8_t>;
+
 	class BaseObject
 	{
 	public:
@@ -13,23 +15,21 @@ namespace PeMaster {
 			const std::filesystem::path& path
 		);
 
-		virtual
-			bool
+		bool
 			open(
 				const std::filesystem::path& path
 			);
 
-		virtual
-			void
+		void
 			open(
-				const std::vector<uint8_t>& buffer
+				const Buffer& buffer
 			);
 
 		virtual
 			~BaseObject() = default;
 
 	protected:
-		std::vector<uint8_t> m_buffer;
+		Buffer m_buffer;
 		bool m_valid = false;
 
 	private:

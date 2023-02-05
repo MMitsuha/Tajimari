@@ -6,7 +6,7 @@ namespace PeMaster {
 	)
 	{
 		spdlog::debug("Section header constructed with offset: {}.", offset);
-		this->SectionHeader::open(offset);
+		open(offset);
 	}
 
 	void
@@ -15,12 +15,12 @@ namespace PeMaster {
 		)
 	{
 		spdlog::debug("Building section header with base object and offset: {}.", offset);
-		this->SectionHeader::open(m_buffer, offset);
+		open(m_buffer, offset);
 	}
 
 	void
 		SectionHeader::open(
-			const std::vector<uint8_t>& buffer,
+			const Buffer& buffer,
 			uint64_t offset
 		)
 	{
@@ -28,15 +28,71 @@ namespace PeMaster {
 		const auto pSectionHeader = reinterpret_cast<IMAGE_SECTION_HEADER const*>(buffer.data() + offset);
 
 		// Copy header to myself
-		this->copyHeaderFrom(pSectionHeader);
+		copyHeaderFrom(pSectionHeader);
 
 		// Copy content to myself
-		if (this->PointerToRawData) {
-			const auto pContent = reinterpret_cast<void const*>(buffer.data() + this->PointerToRawData);
-			this->copyContentFrom(pContent, this->SizeOfRawData);
+		if (pSectionHeader->PointerToRawData) {
+			const auto pContent = reinterpret_cast<void const*>(buffer.data() + PointerToRawData);
+			copyContentFrom(pContent, SizeOfRawData);
 		}
 
 		m_valid = true;
+	}
+
+	size_t
+		SectionHeader::copyHeaderTo(
+			uint64_t offset
+		)
+	{
+		return copyHeaderTo(m_buffer, offset);
+	}
+
+	size_t
+		SectionHeader::copyHeaderTo(
+			Buffer& buffer,
+			uint64_t offset
+		)
+	{
+		auto pointer = reinterpret_cast<uint8_t*>(dynamic_cast<PIMAGE_SECTION_HEADER>(this));
+		buffer.resize(offset + sizeof(IMAGE_SECTION_HEADER));
+		std::copy(pointer, pointer + sizeof(IMAGE_SECTION_HEADER), buffer.begin() + offset);
+
+		return offset + sizeof(IMAGE_SECTION_HEADER);
+	}
+
+	size_t
+		SectionHeader::copyContentTo(
+			uint64_t offset,
+			DWORD fileAlign
+		)
+	{
+		return copyContentTo(m_buffer, offset, m_content, fileAlign);
+	}
+
+	size_t
+		SectionHeader::copyContentTo(
+			Buffer& buffer,
+			uint64_t offset,
+			DWORD fileAlign
+		)
+	{
+		return copyContentTo(buffer, offset, m_content, fileAlign);
+	}
+
+	size_t
+		SectionHeader::copyContentTo(
+			Buffer& buffer,
+			uint64_t offset,
+			Buffer& content,
+			DWORD fileAlign
+		)
+	{
+		align_up(offset, fileAlign);
+
+		buffer.resize(offset + content.size());
+		std::copy(content.cbegin(), content.cend(), buffer.begin() + offset);
+
+		return offset + content.size();
 	}
 
 	void
@@ -56,8 +112,8 @@ namespace PeMaster {
 		)
 	{
 		spdlog::debug("Copied to section content with size: {}.", size);
-		content.clear();
+		m_content.clear();
 		auto buffer = reinterpret_cast<const uint8_t*>(pointer);
-		std::copy(buffer, buffer + size, std::back_inserter(content));
+		std::copy(buffer, buffer + size, std::back_inserter(m_content));
 	}
 }

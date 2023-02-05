@@ -11,7 +11,8 @@ namespace PeMaster {
 	class Pe
 		:virtual public BaseObject,
 		private DosHeader,
-		private NtHeaders
+		private NtHeaders,
+		private SectionHeaders
 	{
 	public:
 		Pe() = default;
@@ -20,16 +21,14 @@ namespace PeMaster {
 			const std::filesystem::path& path
 		);
 
-		virtual
-			bool
+		bool
 			open(
 				const std::filesystem::path& buffer
 			);
 
-		virtual
-			void
+		void
 			open(
-				const std::vector<uint8_t>& buffer
+				const Buffer& buffer
 			);
 
 		bool
@@ -37,37 +36,37 @@ namespace PeMaster {
 				void
 			);
 
-		DosHeader*
+		DosHeader&
 			getDosHeader(
 				void
 			);
 
-		NtHeaders*
+		NtHeaders&
 			getNtHeaders(
 				void
 			);
 
-		std::vector<SectionHeader>*
+		SectionHeaders&
 			getSectionHeaders(
 				void
 			);
 
-		BaseObject*
+		BaseObject&
 			asBaseObject(
 				void
 			);
 
-		SectionHeader
+		SectionHeader&
 			getSectionByVa(
 				uint64_t va
 			);
 
-		SectionHeader
+		SectionHeader&
 			getSectionByRva(
 				uint64_t rva
 			);
 
-		SectionHeader
+		SectionHeader&
 			getSectionByFo(
 				uint64_t fo
 			);
@@ -76,12 +75,14 @@ namespace PeMaster {
 		//	Pe read: enumerate data dictionary
 		//
 
-		std::vector<std::tuple<uint16_t, std::string, void*>>
+		using Exports = std::vector<std::tuple<uint32_t, std::string, void*>>;
+		Exports
 			enumExport(
 				void
 			);
 
-		std::vector<std::pair<std::string, std::vector<std::tuple<IMAGE_THUNK_DATA, std::string, WORD>>>>
+		using Imports = std::vector<std::pair<std::string, std::vector<std::tuple<IMAGE_THUNK_DATA, std::string, WORD>>>>;
+		Imports
 			enumImport(
 				void
 			);
@@ -157,6 +158,25 @@ namespace PeMaster {
 			);
 
 		//
+		//	Pe write
+		//
+
+		bool
+			rebuild(
+				void
+			);
+
+		bool
+			write(
+				const std::filesystem::path& path
+			);
+
+		void
+			write(
+				Buffer& buffer
+			);
+
+		//
 		//	Offset Translate
 		//
 
@@ -168,7 +188,7 @@ namespace PeMaster {
 		uint64_t
 			rvaToVa(
 				uint64_t rva
-			) noexcept;
+			);
 
 		uint64_t
 			foToRva(
@@ -194,8 +214,9 @@ namespace PeMaster {
 			~Pe() = default;
 
 	private:
-		std::vector<uint8_t> m_DosStub;
-
-		std::vector<SectionHeader> m_SectionHeaders;
+		void
+			open(
+				void
+			);
 	};
 }

@@ -3,6 +3,8 @@
 #include <winnt.h>
 
 namespace PeMaster {
+	using DosStub = std::vector<uint8_t>;
+
 	class DosHeader
 		:virtual public BaseObject,
 		public IMAGE_DOS_HEADER
@@ -10,20 +12,30 @@ namespace PeMaster {
 	public:
 		DosHeader();
 
-		virtual
-			void
+		void
 			open(
 				void
 			);
 
-		virtual
-			void
+		void
 			open(
-				const std::vector<uint8_t>& buffer
+				const Buffer& buffer
+			);
+
+		size_t
+			copyTo(
+				void
+			);
+
+		size_t
+			copyTo(
+				Buffer& buffer
 			);
 
 		virtual
 			~DosHeader() = default;
+
+		DosStub m_DosStub;
 
 	private:
 		void

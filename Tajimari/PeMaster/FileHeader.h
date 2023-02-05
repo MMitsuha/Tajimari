@@ -10,20 +10,29 @@ namespace PeMaster {
 	public:
 		FileHeader() = default;
 		FileHeader(
-			uint32_t offset
+			uint64_t offset
 		);
 
-		virtual
-			void
+		void
 			open(
-				uint32_t offset
+				uint64_t offset
 			);
 
-		virtual
-			void
+		void
 			open(
-				const std::vector<uint8_t>& buffer,
-				uint32_t offset
+				const Buffer& buffer,
+				uint64_t offset
+			);
+
+		void
+			copyTo(
+				uint64_t offset
+			);
+
+		void
+			copyTo(
+				Buffer& buffer,
+				uint64_t offset
 			);
 
 		virtual

@@ -7,7 +7,7 @@ namespace PeMaster {
 	)
 	{
 		spdlog::debug("Base object constructed.");
-		this->BaseObject::open(path);
+		open(path);
 	}
 
 	bool
@@ -31,7 +31,7 @@ namespace PeMaster {
 
 	void
 		BaseObject::open(
-			const std::vector<uint8_t>& buffer
+			const Buffer& buffer
 		)
 	{
 		spdlog::debug("Building base object with given buffer.");
