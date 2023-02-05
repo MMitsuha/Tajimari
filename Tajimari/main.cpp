@@ -16,6 +16,7 @@ wmain(
 
 	objTarget.enumImport();
 	objTarget.enumExport();
+	objTarget.enumBasereloc();
 	objTarget.rebuild();
 
 	objTarget.write(R"(.\qwq.exe)");

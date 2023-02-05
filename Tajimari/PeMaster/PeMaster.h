@@ -102,7 +102,8 @@ namespace PeMaster {
 				void
 			);
 
-		void
+		using Relocs = std::vector<std::pair<uint8_t, uint32_t>>;
+		Relocs
 			enumBasereloc(
 				void
 			);
@@ -208,6 +209,21 @@ namespace PeMaster {
 		uint64_t
 			vaToFo(
 				uint64_t va
+			);
+
+		bool
+			validVa(
+				uint64_t va
+			);
+
+		bool
+			validRva(
+				uint64_t rva
+			);
+
+		bool
+			validFo(
+				uint64_t fo
 			);
 
 		virtual
