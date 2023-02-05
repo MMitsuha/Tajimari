@@ -145,6 +145,19 @@ namespace PeMaster {
 		throw std::out_of_range("No section matched given FO.");
 	}
 
+	SectionHeader&
+		Pe::getSectionByName(
+			const std::string& name
+		)
+	{
+		auto& rSectionHeaders = getSectionHeaders();
+		for (const auto& sec : rSectionHeaders) {
+			if (name == reinterpret_cast<char const*>(sec.Name)) return const_cast<SectionHeader&>(sec);
+		}
+
+		throw std::out_of_range("No section matched given name.");
+	}
+
 	//
 	//	Pe read: enumerate data dictionary
 	//
@@ -171,12 +184,12 @@ namespace PeMaster {
 		auto baseOrdinal = pExport->Base;
 
 		for (size_t i = 0; i < pExport->NumberOfFunctions; i++) {
-			std::string funcName = reinterpret_cast<char*>(base + tableName[i]);
+			std::string funcName = reinterpret_cast<char*>(base + rvaToFo(tableName[i]));
 			auto funcOrd = tableOrdName[i] + baseOrdinal;
-			void* funcAddr = base + tableAddr[funcOrd];
-			ret.emplace_back(funcOrd, funcName, funcAddr);
+			auto funcRvaAddr = tableAddr[i];
+			ret.emplace_back(funcOrd, funcName, funcRvaAddr);
 
-			spdlog::debug("Ordinal: {}, name: {}, address: {}.", funcOrd, funcName, funcAddr);
+			spdlog::debug("Ordinal: {}, name: {}, rva: 0x{:x}.", funcOrd, funcName, funcRvaAddr);
 		}
 
 		return ret;
@@ -200,28 +213,30 @@ namespace PeMaster {
 		auto pImport = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(base + rvaToFo(rva));
 
 		while (pImport->Name) {
-			std::vector<std::tuple<IMAGE_THUNK_DATA, std::string, WORD>> data;
 			std::string name = reinterpret_cast<char*>(base + rvaToFo(pImport->Name));
 			auto pThunk = reinterpret_cast<PIMAGE_THUNK_DATA>(base + rvaToFo(pImport->FirstThunk));
 			spdlog::debug("In {}:", name);
 
 			while (pThunk->u1.Function) {
+				Import data{};
 				if (pThunk->u1.Function & IMAGE_ORDINAL_FLAG) {
 					// Imported by ordinal
 					spdlog::debug("\tImported by ordinal: 0x{:x}.", pThunk->u1.Ordinal & ~IMAGE_ORDINAL_FLAG);
-					data.emplace_back(*pThunk, std::string(), 0);
 				}
 				else {
 					// Imported by name
 					auto func = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(base + rvaToFo(pThunk->u1.Function));
 					spdlog::debug("\tImported by name: {} and hint: {}.", func->Name, func->Hint);
-					data.emplace_back(*pThunk, func->Name, func->Hint);
+					data.ByName.Hint = func->Hint;
+					data.ByName.Name = func->Name;
 				}
+
+				data.Thunk = *pThunk;
+				ret.emplace_back(std::move(data));
 
 				pThunk++;
 			}
 
-			ret.emplace_back(name, data);
 			pImport++;
 		}
 
@@ -269,6 +284,7 @@ namespace PeMaster {
 		auto base = m_buffer.data();
 		auto endOfRelocs = reinterpret_cast<uint8_t*>(base + rvaToFo(rva) + size);
 		auto pRelocsBlock = reinterpret_cast<PIMAGE_BASE_RELOCATION>(base + rvaToFo(rva));
+		auto i = 0;
 		while (reinterpret_cast<uint8_t*>(pRelocsBlock) < endOfRelocs) {
 			auto numRelocsInBlock = (pRelocsBlock->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(uint16_t);
 			auto reloc = reinterpret_cast<uint16_t*>(pRelocsBlock + 1);
@@ -278,9 +294,11 @@ namespace PeMaster {
 				auto rvaReloc = pRelocsBlock->VirtualAddress + offset;
 				ret.emplace_back(type, rvaReloc);
 
-				spdlog::debug("Relocation type: {}, rva: 0x{:x}", type, rvaReloc);
+				spdlog::debug("{}: Relocation type: {}, rva: 0x{:x}", i, type, rvaReloc);
 			}
+
 			pRelocsBlock = reinterpret_cast<PIMAGE_BASE_RELOCATION>(reinterpret_cast<uint8_t*>(pRelocsBlock) + pRelocsBlock->SizeOfBlock);
+			i++;
 		}
 
 		return ret;
@@ -390,6 +408,8 @@ namespace PeMaster {
 			spdlog::warn("Nt headers overwrite dos header field.");
 		}
 
+		// Update section number
+		rNtHeaders.getFileHeader().NumberOfSections = rSectionHeaders.size();
 		// Copy nt headers
 		offset = rNtHeaders.copyTo(rDosHeader.e_lfanew);
 		// Update nt headers
@@ -402,13 +422,35 @@ namespace PeMaster {
 			// Copy section header
 			offset = sec.copyHeaderTo(m_buffer, offset);
 		}
+		uint64_t rvaLastSectionEnd = 0;
 		for (auto& sec : rSectionHeaders) {
-			// Copy section content
-			offset = sec.copyContentTo(m_buffer, sec.PointerToRawData, rNtHeaders.getOptionalHeader().FileAlignment);
-			// Update section header
-			sec.open(m_buffer, oldOffsets.front());
+			auto oldOffset = oldOffsets.front();
 			oldOffsets.pop();
+			bool updateRequired = false;
+			// Check if the content offset is smaller than current offset,
+			// if true, then set it to current offset
+			if (sec.PointerToRawData < offset) {
+				sec.PointerToRawData = align_up(offset, rNtHeaders.getOptionalHeader().FileAlignment);
+				updateRequired = true;
+			}
+			// Check if the virtual address conflict with other section,
+			// if true, then set it to the nearest end and align it
+			if (sec.VirtualAddress < rvaLastSectionEnd) {
+				sec.VirtualAddress = align_up(rvaLastSectionEnd, rNtHeaders.getOptionalHeader().SectionAlignment);
+				updateRequired = true;
+			}
+			// If we modified the header, we must write it back
+			if (updateRequired) {
+				sec.copyHeaderTo(m_buffer, oldOffset);
+			}
+			// Copy section content
+			offset = sec.copyContentTo(m_buffer, sec.PointerToRawData);
+			// Update section header
+			sec.open(m_buffer, oldOffset);
+			rvaLastSectionEnd = sec.VirtualAddress + sec.Misc.VirtualSize;
 		}
+
+		// TODO: Update image size and code size
 
 		return true;
 	}
@@ -449,7 +491,7 @@ namespace PeMaster {
 		auto vaEntry = getNtHeaders().getOptionalHeader().AddressOfEntryPoint;
 
 		if (va < vaEntry) {
-			spdlog::error("Virtual address: 0x{:x} is not in process's memory range.", va);
+			spdlog::error("Va: 0x{:x} is not in process's memory range.", va);
 		}
 
 		return va - vaEntry;

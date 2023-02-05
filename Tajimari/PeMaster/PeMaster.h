@@ -71,17 +71,37 @@ namespace PeMaster {
 				uint64_t fo
 			);
 
+		SectionHeader&
+			getSectionByName(
+				const std::string& name
+			);
+
 		//
 		//	Pe read: enumerate data dictionary
 		//
 
-		using Exports = std::vector<std::tuple<uint32_t, std::string, void*>>;
+		typedef struct _EXPORT {
+			uint32_t Ordinal;
+			std::string Name;
+			uint32_t Rva;
+		} Export, * PExport;
+
+		using Exports = std::vector<Export>;
 		Exports
 			enumExport(
 				void
 			);
 
-		using Imports = std::vector<std::pair<std::string, std::vector<std::tuple<IMAGE_THUNK_DATA, std::string, WORD>>>>;
+		typedef struct _IMPORT {
+			IMAGE_THUNK_DATA Thunk;
+			struct
+			{
+				WORD Hint;
+				std::string Name;
+			} ByName;
+		} Import, * PImport;
+
+		using Imports = std::vector<Import>;
 		Imports
 			enumImport(
 				void
@@ -102,7 +122,12 @@ namespace PeMaster {
 				void
 			);
 
-		using Relocs = std::vector<std::pair<uint8_t, uint32_t>>;
+		typedef struct _RELOC {
+			uint8_t Type;
+			uint32_t Rva;
+		} Reloc, * PReloc;
+
+		using Relocs = std::vector<Reloc>;
 		Relocs
 			enumBasereloc(
 				void

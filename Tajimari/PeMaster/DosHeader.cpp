@@ -43,9 +43,10 @@ namespace PeMaster {
 		// TODO: parse rich header
 
 		// Initialize dos stub
+		m_DosStub.resize(pDosHeader->e_lfanew - sizeof(IMAGE_DOS_HEADER));
 		std::copy(m_buffer.cbegin() + sizeof(IMAGE_DOS_HEADER),
 			m_buffer.cbegin() + pDosHeader->e_lfanew,
-			std::back_inserter(m_DosStub));
+			m_DosStub.begin());
 
 		m_valid = true;
 	}

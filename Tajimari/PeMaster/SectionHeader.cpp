@@ -62,33 +62,28 @@ namespace PeMaster {
 
 	size_t
 		SectionHeader::copyContentTo(
-			uint64_t offset,
-			DWORD fileAlign
+			uint64_t offset
 		)
 	{
-		return copyContentTo(m_buffer, offset, m_content, fileAlign);
+		return copyContentTo(m_buffer, offset, m_content);
+	}
+
+	size_t
+		SectionHeader::copyContentTo(
+			Buffer& buffer,
+			uint64_t offset
+		)
+	{
+		return copyContentTo(buffer, offset, m_content);
 	}
 
 	size_t
 		SectionHeader::copyContentTo(
 			Buffer& buffer,
 			uint64_t offset,
-			DWORD fileAlign
+			Buffer& content
 		)
 	{
-		return copyContentTo(buffer, offset, m_content, fileAlign);
-	}
-
-	size_t
-		SectionHeader::copyContentTo(
-			Buffer& buffer,
-			uint64_t offset,
-			Buffer& content,
-			DWORD fileAlign
-		)
-	{
-		align_up(offset, fileAlign);
-
 		buffer.resize(offset + content.size());
 		std::copy(content.cbegin(), content.cend(), buffer.begin() + offset);
 
@@ -113,7 +108,8 @@ namespace PeMaster {
 	{
 		spdlog::debug("Copied to section content with size: {}.", size);
 		m_content.clear();
+		m_content.resize(size);
 		auto buffer = reinterpret_cast<const uint8_t*>(pointer);
-		std::copy(buffer, buffer + size, std::back_inserter(m_content));
+		std::copy(buffer, buffer + size, m_content.begin());
 	}
 }

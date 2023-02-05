@@ -33,8 +33,8 @@ main(
 	void
 )
 {
-	LI_FN(LoadLibraryW)(L"USER32.dll");
-	LI_FN(MessageBoxW)(nullptr, L"Hello World", L"Infected", MB_OK);
+	//LI_FN(LoadLibraryW)(L"USER32.dll");
+	//LI_FN(MessageBoxW)(nullptr, L"Hello World", L"Infected", MB_OK);
 
 	/*ZydisDecoder decoder;
 	ZydisDecodedInstruction instruction;

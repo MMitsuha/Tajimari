@@ -56,23 +56,20 @@ namespace PeMaster {
 
 		size_t
 			copyContentTo(
-				uint64_t offset,
-				DWORD fileAlign
+				uint64_t offset
+			);
+
+		size_t
+			copyContentTo(
+				Buffer& buffer,
+				uint64_t offset
 			);
 
 		size_t
 			copyContentTo(
 				Buffer& buffer,
 				uint64_t offset,
-				DWORD fileAlign
-			);
-
-		size_t
-			copyContentTo(
-				Buffer& buffer,
-				uint64_t offset,
-				Buffer& content,
-				DWORD fileAlign
+				Buffer& content
 			);
 
 		virtual
