@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		README.md = README.md
-		.github\workflows\msbuild.yml.bak = .github\workflows\msbuild.yml.bak
+		.github\workflows\msbuild.yml = .github\workflows\msbuild.yml
 		vcpkg.json = vcpkg.json
 	EndProjectSection
 EndProject
