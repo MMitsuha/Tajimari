@@ -80,11 +80,11 @@ namespace PeMaster {
 		//	Pe read: enumerate data dictionary
 		//
 
-		typedef struct _EXPORT {
+		using Export = struct _EXPORT {
 			uint32_t Ordinal;
 			std::string Name;
 			uint32_t Rva;
-		} Export, * PExport;
+		};
 
 		using Exports = std::vector<Export>;
 		Exports
@@ -92,20 +92,20 @@ namespace PeMaster {
 				void
 			);
 
-		typedef struct _IMPORT {
+		using Import = struct _IMPORT {
 			IMAGE_THUNK_DATA Thunk;
 			struct
 			{
 				WORD Hint;
 				std::string Name;
 			} ByName;
-		} Import, * PImport;
+		};
 
-		typedef struct _IMPORT_ENTRY {
+		using ImportEntry = struct _IMPORT_ENTRY {
 			std::string DllName;
 			bool IsBound;
 			std::vector<Import> Table;
-		} ImportEntry, * PImportEntry;
+		};
 
 		using Imports = std::vector<ImportEntry>;
 		Imports
@@ -128,10 +128,10 @@ namespace PeMaster {
 				void
 			);
 
-		typedef struct _RELOC {
+		using Reloc = struct _RELOC {
 			uint8_t Type;
 			uint32_t Rva;
-		} Reloc, * PReloc;
+		};
 
 		using Relocs = std::vector<Reloc>;
 		Relocs

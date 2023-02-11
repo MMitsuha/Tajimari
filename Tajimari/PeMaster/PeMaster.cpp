@@ -496,7 +496,10 @@ namespace PeMaster {
 		rebuild();
 	}
 
-	bool
+	void
+		Pe::
+
+		bool
 		Pe::rebuild(
 			void
 		)
