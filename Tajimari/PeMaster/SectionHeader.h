@@ -29,75 +29,75 @@ namespace PeMaster {
 	public:
 		SectionHeader() = default;
 		SectionHeader(
-			uint64_t offset
+			size_t offset
 		);
 
 		void
 			open(
-				uint64_t offset
+				size_t offset
 			);
 
 		void
 			open(
 				const Buffer& buffer,
-				uint64_t offset
+				size_t offset
 			);
 
 		size_t
 			copyHeaderTo(
-				uint64_t offset
+				size_t offset
 			);
 
 		size_t
 			copyHeaderTo(
 				Buffer& buffer,
-				uint64_t offset
+				size_t offset
 			);
 
 		size_t
 			copyHeaderToNoAlloc(
-				uint64_t offset
+				size_t offset
 			);
 
 		size_t
 			copyHeaderToNoAlloc(
 				Buffer& buffer,
-				uint64_t offset
+				size_t offset
 			);
 
 		size_t
 			copyContentTo(
-				uint64_t offset
-			);
-
-		size_t
-			copyContentTo(
-				Buffer& buffer,
-				uint64_t offset
+				size_t offset
 			);
 
 		size_t
 			copyContentTo(
 				Buffer& buffer,
-				uint64_t offset,
+				size_t offset
+			);
+
+		size_t
+			copyContentTo(
+				Buffer& buffer,
+				size_t offset,
 				Buffer& content
 			);
 
 		size_t
 			copyContentToNoAlloc(
-				uint64_t offset
+				size_t offset
 			);
 
 		size_t
 			copyContentToNoAlloc(
 				Buffer& buffer,
-				uint64_t offset
+				size_t offset
 			);
 
 		size_t
 			copyContentToNoAlloc(
 				Buffer& buffer,
-				uint64_t offset,
+				size_t offset,
 				Buffer& content
 			);
 

@@ -2,7 +2,7 @@
 
 namespace PeMaster {
 	OptionalHeader::OptionalHeader(
-		uint64_t offset,
+		size_t offset,
 		size_t size
 	)
 	{
@@ -12,7 +12,7 @@ namespace PeMaster {
 
 	void
 		OptionalHeader::open(
-			uint64_t offset,
+			size_t offset,
 			size_t size
 		)
 	{
@@ -23,7 +23,7 @@ namespace PeMaster {
 	void
 		OptionalHeader::open(
 			const Buffer& buffer,
-			uint64_t offset,
+			size_t offset,
 			size_t size
 		)
 	{
@@ -42,7 +42,7 @@ namespace PeMaster {
 
 	void
 		OptionalHeader::copyTo(
-			uint64_t offset,
+			size_t offset,
 			size_t size
 		)
 	{
@@ -52,7 +52,7 @@ namespace PeMaster {
 	void
 		OptionalHeader::copyTo(
 			Buffer& buffer,
-			uint64_t offset,
+			size_t offset,
 			size_t size
 		)
 	{
@@ -63,7 +63,7 @@ namespace PeMaster {
 
 	void
 		OptionalHeader::copyToNoAlloc(
-			uint64_t offset,
+			size_t offset,
 			size_t size
 		)
 	{
@@ -73,7 +73,7 @@ namespace PeMaster {
 	void
 		OptionalHeader::copyToNoAlloc(
 			Buffer& buffer,
-			uint64_t offset,
+			size_t offset,
 			size_t size
 		)
 	{

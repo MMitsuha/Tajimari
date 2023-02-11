@@ -2,7 +2,7 @@
 
 namespace PeMaster {
 	SectionHeader::SectionHeader(
-		uint64_t offset
+		size_t offset
 	)
 	{
 		spdlog::debug("Section header constructed with offset: {}.", offset);
@@ -11,7 +11,7 @@ namespace PeMaster {
 
 	void
 		SectionHeader::open(
-			uint64_t offset
+			size_t offset
 		)
 	{
 		spdlog::debug("Building section header with base object and offset: {}.", offset);
@@ -21,7 +21,7 @@ namespace PeMaster {
 	void
 		SectionHeader::open(
 			const Buffer& buffer,
-			uint64_t offset
+			size_t offset
 		)
 	{
 		spdlog::debug("Building section header with given buffer and offset: {}.", offset);
@@ -41,7 +41,7 @@ namespace PeMaster {
 
 	size_t
 		SectionHeader::copyHeaderTo(
-			uint64_t offset
+			size_t offset
 		)
 	{
 		return copyHeaderTo(m_buffer, offset);
@@ -50,7 +50,7 @@ namespace PeMaster {
 	size_t
 		SectionHeader::copyHeaderTo(
 			Buffer& buffer,
-			uint64_t offset
+			size_t offset
 		)
 	{
 		auto pointer = reinterpret_cast<uint8_t*>(dynamic_cast<PIMAGE_SECTION_HEADER>(this));
@@ -62,7 +62,7 @@ namespace PeMaster {
 
 	size_t
 		SectionHeader::copyHeaderToNoAlloc(
-			uint64_t offset
+			size_t offset
 		)
 	{
 		return copyHeaderToNoAlloc(m_buffer, offset);
@@ -71,7 +71,7 @@ namespace PeMaster {
 	size_t
 		SectionHeader::copyHeaderToNoAlloc(
 			Buffer& buffer,
-			uint64_t offset
+			size_t offset
 		)
 	{
 		auto pointer = reinterpret_cast<uint8_t*>(dynamic_cast<PIMAGE_SECTION_HEADER>(this));
@@ -82,7 +82,7 @@ namespace PeMaster {
 
 	size_t
 		SectionHeader::copyContentTo(
-			uint64_t offset
+			size_t offset
 		)
 	{
 		return copyContentTo(m_buffer, offset, m_content);
@@ -91,7 +91,7 @@ namespace PeMaster {
 	size_t
 		SectionHeader::copyContentTo(
 			Buffer& buffer,
-			uint64_t offset
+			size_t offset
 		)
 	{
 		return copyContentTo(buffer, offset, m_content);
@@ -100,7 +100,7 @@ namespace PeMaster {
 	size_t
 		SectionHeader::copyContentTo(
 			Buffer& buffer,
-			uint64_t offset,
+			size_t offset,
 			Buffer& content
 		)
 	{
@@ -112,7 +112,7 @@ namespace PeMaster {
 
 	size_t
 		SectionHeader::copyContentToNoAlloc(
-			uint64_t offset
+			size_t offset
 		)
 	{
 		return copyContentToNoAlloc(m_buffer, offset, m_content);
@@ -121,7 +121,7 @@ namespace PeMaster {
 	size_t
 		SectionHeader::copyContentToNoAlloc(
 			Buffer& buffer,
-			uint64_t offset
+			size_t offset
 		)
 	{
 		return copyContentToNoAlloc(buffer, offset, m_content);
@@ -130,7 +130,7 @@ namespace PeMaster {
 	size_t
 		SectionHeader::copyContentToNoAlloc(
 			Buffer& buffer,
-			uint64_t offset,
+			size_t offset,
 			Buffer& content
 		)
 	{

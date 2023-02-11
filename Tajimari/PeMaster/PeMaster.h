@@ -104,7 +104,8 @@ namespace PeMaster {
 
 		using ImportEntry = struct _IMPORT_ENTRY {
 			std::string DllName;
-			bool IsBound;
+			DWORD TimeDateStamp;
+			DWORD ForwarderChain;
 			std::vector<Import> Table;
 		};
 

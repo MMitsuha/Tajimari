@@ -10,46 +10,46 @@ namespace PeMaster {
 	public:
 		OptionalHeader() = default;
 		OptionalHeader(
-			uint64_t offset,
+			size_t offset,
 			size_t size
 		);
 
 		void
 			open(
-				uint64_t offset,
+				size_t offset,
 				size_t size
 			);
 
 		void
 			open(
 				const Buffer& buffer,
-				uint64_t offset,
+				size_t offset,
 				size_t size
 			);
 
 		void
 			copyTo(
-				uint64_t offset,
+				size_t offset,
 				size_t size
 			);
 
 		void
 			copyTo(
 				Buffer& buffer,
-				uint64_t offset,
+				size_t offset,
 				size_t size
 			);
 
 		void
 			copyToNoAlloc(
-				uint64_t offset,
+				size_t offset,
 				size_t size
 			);
 
 		void
 			copyToNoAlloc(
 				Buffer& buffer,
-				uint64_t offset,
+				size_t offset,
 				size_t size
 			);
 

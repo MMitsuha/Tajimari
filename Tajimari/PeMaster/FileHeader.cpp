@@ -2,7 +2,7 @@
 
 namespace PeMaster {
 	FileHeader::FileHeader(
-		uint64_t offset
+		size_t offset
 	)
 	{
 		spdlog::debug("File header constructed with offset: {}.", offset);
@@ -11,7 +11,7 @@ namespace PeMaster {
 
 	void
 		FileHeader::open(
-			uint64_t offset
+			size_t offset
 		)
 	{
 		spdlog::debug("Building file header with base object and offset: {}.", offset);
@@ -21,7 +21,7 @@ namespace PeMaster {
 	void
 		FileHeader::open(
 			const Buffer& buffer,
-			uint64_t offset
+			size_t offset
 		)
 	{
 		if (buffer.empty()) {
@@ -39,7 +39,7 @@ namespace PeMaster {
 
 	void
 		FileHeader::copyTo(
-			uint64_t offset
+			size_t offset
 		)
 	{
 		copyTo(m_buffer, offset);
@@ -48,7 +48,7 @@ namespace PeMaster {
 	void
 		FileHeader::copyTo(
 			Buffer& buffer,
-			uint64_t offset
+			size_t offset
 		)
 	{
 		auto pointer = reinterpret_cast<uint8_t*>(dynamic_cast<PIMAGE_FILE_HEADER>(this));
@@ -58,7 +58,7 @@ namespace PeMaster {
 
 	void
 		FileHeader::copyToNoAlloc(
-			uint64_t offset
+			size_t offset
 		)
 	{
 		copyToNoAlloc(m_buffer, offset);
@@ -67,7 +67,7 @@ namespace PeMaster {
 	void
 		FileHeader::copyToNoAlloc(
 			Buffer& buffer,
-			uint64_t offset
+			size_t offset
 		)
 	{
 		auto pointer = reinterpret_cast<uint8_t*>(dynamic_cast<PIMAGE_FILE_HEADER>(this));

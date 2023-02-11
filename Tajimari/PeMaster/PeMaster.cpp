@@ -220,7 +220,7 @@ namespace PeMaster {
 			auto pThunk = reinterpret_cast<PIMAGE_THUNK_DATA>(base + rvaToFo(pImport->FirstThunk));
 			spdlog::debug("In {}:", name);
 			entry.DllName = std::move(name);
-			entry.IsBound = pImport->TimeDateStamp == -1;
+			entry.TimeDateStamp = pImport->TimeDateStamp;
 
 			while (pThunk->u1.Function) {
 				Import data{};
@@ -447,7 +447,7 @@ namespace PeMaster {
 		auto pDescriptorStart = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(content.data());
 		for (const auto& entry : imports) {
 			pDescriptorStart->ForwarderChain = 0;
-			pDescriptorStart->TimeDateStamp = entry.IsBound ? -1 : 0;
+			pDescriptorStart->TimeDateStamp = entry.TimeDateStamp;
 
 			pDescriptorStart++;
 		}

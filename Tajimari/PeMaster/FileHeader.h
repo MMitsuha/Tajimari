@@ -10,40 +10,40 @@ namespace PeMaster {
 	public:
 		FileHeader() = default;
 		FileHeader(
-			uint64_t offset
+			size_t offset
 		);
 
 		void
 			open(
-				uint64_t offset
+				size_t offset
 			);
 
 		void
 			open(
 				const Buffer& buffer,
-				uint64_t offset
+				size_t offset
 			);
 
 		void
 			copyTo(
-				uint64_t offset
+				size_t offset
 			);
 
 		void
 			copyTo(
 				Buffer& buffer,
-				uint64_t offset
+				size_t offset
 			);
 
 		void
 			copyToNoAlloc(
-				uint64_t offset
+				size_t offset
 			);
 
 		void
 			copyToNoAlloc(
 				Buffer& buffer,
-				uint64_t offset
+				size_t offset
 			);
 
 		virtual

@@ -19,9 +19,4 @@
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <MASM Include="entry.asm">
-      <Filter>源文件</Filter>
-    </MASM>
-  </ItemGroup>
 </Project>
