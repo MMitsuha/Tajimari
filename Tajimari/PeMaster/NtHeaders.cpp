@@ -119,4 +119,14 @@ namespace PeMaster {
 
 		return offset + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + rFileHeader.SizeOfOptionalHeader;
 	}
+
+	size_t
+		NtHeaders::totalSize(
+			void
+		)
+	{
+		auto& rFileHeader = getFileHeader();
+
+		return sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + rFileHeader.SizeOfOptionalHeader;
+	}
 }

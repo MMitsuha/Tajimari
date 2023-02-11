@@ -32,6 +32,21 @@ namespace PeMaster {
 				Buffer& buffer
 			);
 
+		size_t
+			copyToNoAlloc(
+				void
+			);
+
+		size_t
+			copyToNoAlloc(
+				Buffer& buffer
+			);
+
+		size_t
+			totalSize(
+				void
+			);
+
 		virtual
 			~DosHeader() = default;
 

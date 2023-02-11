@@ -61,6 +61,26 @@ namespace PeMaster {
 	}
 
 	size_t
+		SectionHeader::copyHeaderToNoAlloc(
+			uint64_t offset
+		)
+	{
+		return copyHeaderToNoAlloc(m_buffer, offset);
+	}
+
+	size_t
+		SectionHeader::copyHeaderToNoAlloc(
+			Buffer& buffer,
+			uint64_t offset
+		)
+	{
+		auto pointer = reinterpret_cast<uint8_t*>(dynamic_cast<PIMAGE_SECTION_HEADER>(this));
+		std::copy(pointer, pointer + sizeof(IMAGE_SECTION_HEADER), buffer.begin() + offset);
+
+		return offset + sizeof(IMAGE_SECTION_HEADER);
+	}
+
+	size_t
 		SectionHeader::copyContentTo(
 			uint64_t offset
 		)
@@ -85,6 +105,35 @@ namespace PeMaster {
 		)
 	{
 		buffer.resize(offset + content.size());
+		std::copy(content.cbegin(), content.cend(), buffer.begin() + offset);
+
+		return offset + content.size();
+	}
+
+	size_t
+		SectionHeader::copyContentToNoAlloc(
+			uint64_t offset
+		)
+	{
+		return copyContentToNoAlloc(m_buffer, offset, m_content);
+	}
+
+	size_t
+		SectionHeader::copyContentToNoAlloc(
+			Buffer& buffer,
+			uint64_t offset
+		)
+	{
+		return copyContentToNoAlloc(buffer, offset, m_content);
+	}
+
+	size_t
+		SectionHeader::copyContentToNoAlloc(
+			Buffer& buffer,
+			uint64_t offset,
+			Buffer& content
+		)
+	{
 		std::copy(content.cbegin(), content.cend(), buffer.begin() + offset);
 
 		return offset + content.size();

@@ -1,4 +1,5 @@
 #pragma once
+#define NOMINMAX
 #include <filesystem>
 #include <vector>
 #include <windows.h>
@@ -196,6 +197,11 @@ namespace PeMaster {
 		void
 			setImport(
 				Imports& imports
+			);
+
+		size_t
+			updateHeaders(
+				void
 			);
 
 		bool

@@ -496,95 +496,121 @@ namespace PeMaster {
 		rebuild();
 	}
 
-	void
-		Pe::
+	size_t
+		Pe::updateHeaders(
+			void
+		)
+	{
+		// Total raw size
+		size_t totalSize = 0;
+		// Get all headers
+		auto& rDosHeader = getDosHeader();
+		auto& rNtHeaders = getNtHeaders();
+		auto& rSectionHeaders = getSectionHeaders();
+		auto& rOptionalHeader = rNtHeaders.getOptionalHeader();
+		auto& rFileHeader = rNtHeaders.getFileHeader();
 
-		bool
+		// Set e_lfanew to a correct value
+		rDosHeader.e_lfanew = std::max<size_t>(rDosHeader.e_lfanew, rDosHeader.totalSize());
+		// Add the size of dos header to totalSize
+		totalSize += rDosHeader.totalSize();
+		// The start position of nt headers
+		auto posNtHeaders = totalSize;
+
+		// Add the size of nt headers to totalSize
+		totalSize += rNtHeaders.totalSize();
+		// The start position of section headers
+		auto posSectionHeaders = totalSize;
+
+		// Add the size of section headers to totalSize
+		totalSize += rSectionHeaders.size() * sizeof(IMAGE_SECTION_HEADER);
+		// The total size of headers
+		auto sizeOfHeaders = align_up(totalSize, rOptionalHeader.FileAlignment);
+		// The start position of section contents in file offset
+		auto posContentFo = sizeOfHeaders;
+		// The start position of section contents in rva
+		auto posContentRva = align_up(totalSize, rOptionalHeader.SectionAlignment);
+		uint32_t sizeOfCode = 0;
+		uint32_t sizeOfInitedData = 0;
+		uint32_t sizeOfUninitedData = 0;
+		for (auto& rSection : rSectionHeaders) {
+			// Correct the parameters that users don't give correctly
+			rSection.SizeOfRawData = rSection.m_content.size();
+			rSection.PointerToRawData = align_up(rSection.PointerToRawData, rOptionalHeader.FileAlignment);
+			// Check if the content offset is smaller than current offset,
+			// if true, then set it to current offset
+			rSection.PointerToRawData = std::max<size_t>(rSection.PointerToRawData, posContentFo);
+			rSection.VirtualAddress = align_up(rSection.VirtualAddress, rOptionalHeader.SectionAlignment);
+			// Check if the rva conflict with other section,
+			// if true, then set it to the nearest end and align it
+			rSection.VirtualAddress = std::max<size_t>(rSection.VirtualAddress, posContentRva);
+
+			// Add the content size to totalSize
+			totalSize = static_cast<size_t>(rSection.PointerToRawData) + rSection.SizeOfRawData;
+
+			// Move the posContentFo to next content
+			posContentFo = align_up(totalSize, rOptionalHeader.FileAlignment);
+			// Move the posContentRva to next content
+			posContentRva = align_up(static_cast<size_t>(rSection.VirtualAddress) + rSection.Misc.VirtualSize, rOptionalHeader.SectionAlignment);
+
+			// Check if the section has code attribute and add to size of code
+			if (rSection.Characteristics & IMAGE_SCN_CNT_CODE) sizeOfCode += rSection.Misc.VirtualSize;
+			// Check if the section has initialized data attribute and add to size of initialized data
+			if (rSection.Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) sizeOfInitedData += rSection.Misc.VirtualSize;
+			// Check if the section has code attribute and add to size of code
+			if (rSection.Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) sizeOfUninitedData += rSection.Misc.VirtualSize;
+		}
+
+		// Update sizes
+		sizeOfCode = align_up(sizeOfCode, rOptionalHeader.SectionAlignment);
+		sizeOfInitedData = align_up(sizeOfInitedData, rOptionalHeader.SectionAlignment);
+		sizeOfUninitedData = align_up(sizeOfUninitedData, rOptionalHeader.SectionAlignment);
+		rOptionalHeader.SizeOfImage = posContentRva;
+		rOptionalHeader.SizeOfCode = sizeOfCode;
+		rOptionalHeader.SizeOfInitializedData = sizeOfInitedData;
+		rOptionalHeader.SizeOfUninitializedData = sizeOfUninitedData;
+		rOptionalHeader.SizeOfHeaders = sizeOfHeaders;
+
+		// Update section numbers
+		rFileHeader.NumberOfSections = rSectionHeaders.size();
+
+		// Update checksum
+
+		return totalSize;
+	}
+
+	bool
 		Pe::rebuild(
 			void
 		)
 	{
+		size_t offset = 0;
+		auto totalSize = updateHeaders();
 		m_buffer.clear();
+		m_buffer.resize(totalSize);
+		// Get all headers
 		auto& rDosHeader = getDosHeader();
 		auto& rNtHeaders = getNtHeaders();
 		auto& rSectionHeaders = getSectionHeaders();
-		size_t offset = 0;
-		size_t offsetHeaders = 0;
+		auto& rOptionalHeader = rNtHeaders.getOptionalHeader();
+		auto& rFileHeader = rNtHeaders.getFileHeader();
 
 		// Copy dos header
-		offset = rDosHeader.copyTo();
-		// Update dos header
-		rDosHeader.open();
-		// Check e_lfanew
-		if (rDosHeader.e_lfanew < offset) {
-			spdlog::warn("Nt headers overwrite dos header field.");
-		}
-
-		// Update section number
-		rNtHeaders.getFileHeader().NumberOfSections = rSectionHeaders.size();
+		rDosHeader.copyToNoAlloc();
 		// Copy nt headers
-		offset = rNtHeaders.copyTo(rDosHeader.e_lfanew);
-		// Update nt headers
-		rNtHeaders.open(rDosHeader.e_lfanew);
-
-		std::queue<uint64_t> oldOffsets;
-		for (auto& sec : rSectionHeaders) {
-			// Backup offset
-			oldOffsets.push(offset);
+		offset = rNtHeaders.copyToNoAlloc(rDosHeader.e_lfanew);
+		// Copy section headers
+		for (auto& rSection : rSectionHeaders) {
+			auto oldOffset = offset;
 			// Copy section header
-			offset = sec.copyHeaderTo(m_buffer, offset);
-		}
-		offsetHeaders = align_up(offset, rNtHeaders.getOptionalHeader().FileAlignment);
-		uint64_t rvaLastSectionEnd = 0;
-		uint32_t sizeOfCode = 0;
-		uint32_t sizeOfInitedData = 0;
-		uint32_t sizeOfUninitedData = 0;
-		for (auto& sec : rSectionHeaders) {
-			auto oldOffset = oldOffsets.front();
-			oldOffsets.pop();
-			bool updateRequired = false;
-			// Check if the content offset is smaller than current offset,
-			// if true, then set it to current offset
-			if (sec.PointerToRawData < offset) {
-				sec.PointerToRawData = align_up(offset, rNtHeaders.getOptionalHeader().FileAlignment);
-				updateRequired = true;
-			}
-			// Check if the virtual address conflict with other section,
-			// if true, then set it to the nearest end and align it
-			if (sec.VirtualAddress < rvaLastSectionEnd) {
-				sec.VirtualAddress = align_up(rvaLastSectionEnd, rNtHeaders.getOptionalHeader().SectionAlignment);
-				updateRequired = true;
-			}
-			// If we modified the header, we must write it back
-			if (updateRequired)  sec.copyHeaderTo(m_buffer, oldOffset);
-			// Check if the section has code attribute and add to size of code
-			if (sec.Characteristics & IMAGE_SCN_CNT_CODE) sizeOfCode += sec.Misc.VirtualSize;
-			// Check if the section has initialized data attribute and add to size of initialized data
-			if (sec.Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) sizeOfInitedData += sec.Misc.VirtualSize;
-			// Check if the section has code attribute and add to size of code
-			if (sec.Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) sizeOfUninitedData += sec.Misc.VirtualSize;
+			offset = rSection.copyHeaderToNoAlloc(m_buffer, offset);
 			// Copy section content
-			offset = sec.copyContentTo(m_buffer, sec.PointerToRawData);
-			// Update section header
-			sec.open(m_buffer, oldOffset);
-			rvaLastSectionEnd = sec.VirtualAddress + sec.Misc.VirtualSize;
+			rSection.copyContentToNoAlloc(m_buffer, rSection.PointerToRawData);
+			rSection.open(m_buffer, oldOffset);
 		}
 
-		// Update sizes and checksum
-		rvaLastSectionEnd = align_up(rvaLastSectionEnd, rNtHeaders.getOptionalHeader().SectionAlignment);
-		sizeOfCode = align_up(sizeOfCode, rNtHeaders.getOptionalHeader().SectionAlignment);
-		sizeOfInitedData = align_up(sizeOfInitedData, rNtHeaders.getOptionalHeader().SectionAlignment);
-		sizeOfUninitedData = align_up(sizeOfUninitedData, rNtHeaders.getOptionalHeader().SectionAlignment);
-		rNtHeaders.getOptionalHeader().SizeOfImage = rvaLastSectionEnd;
-		rNtHeaders.getOptionalHeader().SizeOfCode = sizeOfCode;
-		rNtHeaders.getOptionalHeader().SizeOfInitializedData = sizeOfInitedData;
-		rNtHeaders.getOptionalHeader().SizeOfUninitializedData = sizeOfUninitedData;
-		rNtHeaders.getOptionalHeader().SizeOfHeaders = offsetHeaders;
-		rNtHeaders.getOptionalHeader().CheckSum = computeChecksum();
-		// Don't re-alloc
-		rNtHeaders.copyToNoAlloc(rDosHeader.e_lfanew);
-
-		// Update checksum
+		rDosHeader.open();
+		rNtHeaders.open(rDosHeader.e_lfanew);
 
 		return true;
 	}

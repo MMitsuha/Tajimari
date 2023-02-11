@@ -46,7 +46,7 @@ wmain(
 	secAdded.Name[2] = 'a';
 	secAdded.Name[3] = 'c';
 	secAdded.Name[4] = 'k';
-	objTarget.rebuild();
+	objTarget.updateHeaders();
 
 	auto vaOriginalMain = objTarget.getNtHeaders().getOptionalHeader().ImageBase + objTarget.getNtHeaders().getOptionalHeader().AddressOfEntryPoint;
 	auto rvaNewMain = secAdded.VirtualAddress + offsetMain;

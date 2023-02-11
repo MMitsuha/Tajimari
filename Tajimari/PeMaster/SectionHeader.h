@@ -55,6 +55,17 @@ namespace PeMaster {
 			);
 
 		size_t
+			copyHeaderToNoAlloc(
+				uint64_t offset
+			);
+
+		size_t
+			copyHeaderToNoAlloc(
+				Buffer& buffer,
+				uint64_t offset
+			);
+
+		size_t
 			copyContentTo(
 				uint64_t offset
 			);
@@ -67,6 +78,24 @@ namespace PeMaster {
 
 		size_t
 			copyContentTo(
+				Buffer& buffer,
+				uint64_t offset,
+				Buffer& content
+			);
+
+		size_t
+			copyContentToNoAlloc(
+				uint64_t offset
+			);
+
+		size_t
+			copyContentToNoAlloc(
+				Buffer& buffer,
+				uint64_t offset
+			);
+
+		size_t
+			copyContentToNoAlloc(
 				Buffer& buffer,
 				uint64_t offset,
 				Buffer& content

@@ -59,6 +59,11 @@ namespace PeMaster {
 				uint32_t offset
 			);
 
+		size_t
+			totalSize(
+				void
+			);
+
 		virtual
 			~NtHeaders() = default;
 

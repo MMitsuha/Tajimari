@@ -71,6 +71,33 @@ namespace PeMaster {
 		return sizeof(IMAGE_DOS_HEADER) + m_DosStub.size();
 	}
 
+	size_t
+		DosHeader::copyToNoAlloc(
+			void
+		)
+	{
+		return copyToNoAlloc(m_buffer);
+	}
+
+	size_t
+		DosHeader::copyToNoAlloc(
+			Buffer& buffer
+		)
+	{
+		auto pointer = reinterpret_cast<uint8_t*>(dynamic_cast<PIMAGE_DOS_HEADER>(this));
+		std::copy(pointer, pointer + sizeof(IMAGE_DOS_HEADER), buffer.begin());
+		std::copy(m_DosStub.cbegin(), m_DosStub.cend(), buffer.begin() + sizeof(IMAGE_DOS_HEADER));
+		return sizeof(IMAGE_DOS_HEADER) + m_DosStub.size();
+	}
+
+	size_t
+		DosHeader::totalSize(
+			void
+		)
+	{
+		return sizeof(IMAGE_DOS_HEADER) + m_DosStub.size();
+	}
+
 	void
 		DosHeader::copyFrom(
 			IMAGE_DOS_HEADER const* pointer
