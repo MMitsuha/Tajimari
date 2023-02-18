@@ -8,6 +8,22 @@
 #include "NtHeaders.h"
 #include "SectionHeader.h"
 
+//
+//  These macros are used to test, set and clear flags respectivly
+//
+
+#ifndef FlagOn
+#define FlagOn(_F,_SF)        ((_F) & (_SF))
+#endif
+
+#ifndef SetFlag
+#define SetFlag(_F,_SF)       ((_F) |= (_SF))
+#endif
+
+#ifndef ClearFlag
+#define ClearFlag(_F,_SF)     ((_F) &= ~(_SF))
+#endif
+
 namespace PeMaster {
 	class Pe
 		:virtual public BaseObject,
@@ -16,11 +32,13 @@ namespace PeMaster {
 		private SectionHeaders
 	{
 	public:
-		Pe() = default;
+		explicit
+			Pe() = default;
 
-		Pe(
-			const std::filesystem::path& path
-		);
+		explicit
+			Pe(
+				const std::filesystem::path& path
+			);
 
 		bool
 			open(
@@ -59,17 +77,17 @@ namespace PeMaster {
 
 		SectionHeader&
 			getSectionByVa(
-				uint64_t va
+				size_t va
 			);
 
 		SectionHeader&
 			getSectionByRva(
-				uint64_t rva
+				size_t rva
 			);
 
 		SectionHeader&
 			getSectionByFo(
-				uint64_t fo
+				size_t fo
 			);
 
 		SectionHeader&
@@ -82,9 +100,9 @@ namespace PeMaster {
 		//
 
 		using Export = struct _EXPORT {
-			uint32_t Ordinal;
+			uint32_t Ordinal = 0;
 			std::string Name;
-			uint32_t Rva;
+			uint32_t Rva = 0;
 		};
 
 		using Exports = std::vector<Export>;
@@ -94,19 +112,20 @@ namespace PeMaster {
 			);
 
 		using Import = struct _IMPORT {
-			IMAGE_THUNK_DATA Thunk;
+			size_t Ordinal;
 			struct
 			{
-				WORD Hint;
+				WORD Hint = 0;
 				std::string Name;
 			} ByName;
 		};
 
 		using ImportEntry = struct _IMPORT_ENTRY {
 			std::string DllName;
-			DWORD TimeDateStamp;
-			DWORD ForwarderChain;
-			std::vector<Import> Table;
+			DWORD TimeDateStamp = 0;
+			DWORD ForwarderChain = 0;
+			std::vector<Import> Iat;
+			std::vector<Import> Ilt;
 		};
 
 		using Imports = std::vector<ImportEntry>;
@@ -131,8 +150,8 @@ namespace PeMaster {
 			);
 
 		using Reloc = struct _RELOC {
-			uint8_t Type;
-			uint32_t Rva;
+			uint8_t Type = 0;
+			uint32_t Rva = 0;
 		};
 
 		using Relocs = std::vector<Reloc>;
@@ -224,49 +243,49 @@ namespace PeMaster {
 		//	Offset Translate
 		//
 
-		uint64_t
+		size_t
 			vaToRva(
-				uint64_t va
+				size_t va
 			);
 
-		uint64_t
+		size_t
 			rvaToVa(
-				uint64_t rva
+				size_t rva
 			);
 
-		uint64_t
+		size_t
 			foToRva(
-				uint64_t fo
+				size_t fo
 			);
 
-		uint64_t
+		size_t
 			rvaToFo(
-				uint64_t rva
+				size_t rva
 			);
 
-		uint64_t
+		size_t
 			foToVa(
-				uint64_t fo
+				size_t fo
 			);
 
-		uint64_t
+		size_t
 			vaToFo(
-				uint64_t va
+				size_t va
 			);
 
 		bool
 			validVa(
-				uint64_t va
+				size_t va
 			);
 
 		bool
 			validRva(
-				uint64_t rva
+				size_t rva
 			);
 
 		bool
 			validFo(
-				uint64_t fo
+				size_t fo
 			);
 
 		uint32_t

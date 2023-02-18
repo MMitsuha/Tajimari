@@ -13,7 +13,8 @@ wmain(
 	//std::string pathTarget = R"(C:\Windows\system32\kernel32.dll)";
 	//std::string pathTarget = R"(C:\Windows\system32\notepad.exe)";
 	std::string pathTemplate = R"(.\ShellcodeTemplate.dll)";
-	std::string pathTarget = R"(E:\upx\upx.exe)";
+	//std::string pathTarget = R"(E:\upx\upx.exe)";
+	std::string pathTarget = R"(.\TestTarget.exe)";
 	//std::string pathTarget = R"(E:\dllexp-x64\dllexp.exe)";
 	PeMaster::Pe objTemplate(pathTemplate);
 	PeMaster::Pe objTarget(pathTarget);
@@ -21,9 +22,10 @@ wmain(
 	auto checksum = objTarget.computeChecksum();
 	spdlog::debug("Target checksum: 0x{:x}", checksum);
 
-	//auto imports = objTarget.enumImport();
-	//objTarget.setImport(imports);
+	auto imports = objTarget.enumImport();
+	objTarget.setImport(imports);
 
+	/*
 	// Get and copy the section
 	auto secText = objTemplate.getSectionByName(".text");
 	auto exports = objTemplate.enumExport();
@@ -52,9 +54,20 @@ wmain(
 	auto rvaNewMain = secAdded.VirtualAddress + offsetMain;
 	objTarget.getNtHeaders().getOptionalHeader().AddressOfEntryPoint = rvaNewMain;
 	(*(uintptr_t*)(secAdded.m_content.data() + offsetVar)) = vaOriginalMain;
+	*/
 
 	objTarget.rebuild();
-	objTarget.write(R"(.\qwq.exe)");
+	objTarget.write(R"(.\Modified.exe)");
+
+	STARTUPINFOW si{};
+	PROCESS_INFORMATION pi{};
+	si.cb = sizeof(si);
+	WCHAR target[] = LR"(.\Modified.exe)";
+	if (CreateProcessW(nullptr, target, nullptr, nullptr, false, CREATE_NEW_CONSOLE, nullptr, nullptr, &si, &pi)) {
+		WaitForSingleObject(pi.hProcess, INFINITE);
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+	}
 
 	return 0;
 }

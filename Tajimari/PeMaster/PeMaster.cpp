@@ -109,7 +109,7 @@ namespace PeMaster {
 
 	SectionHeader&
 		Pe::getSectionByVa(
-			uint64_t va
+			size_t va
 		)
 	{
 		auto rva = vaToRva(va);
@@ -119,13 +119,13 @@ namespace PeMaster {
 
 	SectionHeader&
 		Pe::getSectionByRva(
-			uint64_t rva
+			size_t rva
 		)
 	{
 		auto& rSectionHeaders = getSectionHeaders();
 		for (const auto& sec : rSectionHeaders) {
-			if (rva == std::clamp(rva, static_cast<uint64_t>(sec.VirtualAddress),
-				static_cast<uint64_t>(sec.VirtualAddress + sec.Misc.VirtualSize))) return const_cast<SectionHeader&>(sec);
+			if (rva == std::clamp(rva, static_cast<size_t>(sec.VirtualAddress),
+				static_cast<size_t>(sec.VirtualAddress + sec.Misc.VirtualSize))) return const_cast<SectionHeader&>(sec);
 		}
 
 		throw std::out_of_range("No section matched given RVA.");
@@ -133,13 +133,13 @@ namespace PeMaster {
 
 	SectionHeader&
 		Pe::getSectionByFo(
-			uint64_t fo
+			size_t fo
 		)
 	{
 		auto& rSectionHeaders = getSectionHeaders();
 		for (const auto& sec : rSectionHeaders) {
-			if (fo == std::clamp(fo, static_cast<uint64_t>(sec.PointerToRawData),
-				static_cast<uint64_t>(sec.PointerToRawData + sec.SizeOfRawData))) return const_cast<SectionHeader&>(sec);
+			if (fo == std::clamp(fo, static_cast<size_t>(sec.PointerToRawData),
+				static_cast<size_t>(sec.PointerToRawData + sec.SizeOfRawData))) return const_cast<SectionHeader&>(sec);
 		}
 
 		throw std::out_of_range("No section matched given FO.");
@@ -217,29 +217,56 @@ namespace PeMaster {
 		while (pImport->Name) {
 			ImportEntry entry;
 			std::string name = reinterpret_cast<char*>(base + rvaToFo(pImport->Name));
-			auto pThunk = reinterpret_cast<PIMAGE_THUNK_DATA>(base + rvaToFo(pImport->FirstThunk));
 			spdlog::debug("In {}:", name);
 			entry.DllName = std::move(name);
 			entry.TimeDateStamp = pImport->TimeDateStamp;
+			entry.ForwarderChain = pImport->ForwarderChain;
 
-			while (pThunk->u1.Function) {
-				Import data{};
-				if (pThunk->u1.Function & IMAGE_ORDINAL_FLAG) {
-					// Imported by ordinal
-					spdlog::debug("\tImported by ordinal: 0x{:x}.", pThunk->u1.Ordinal & ~IMAGE_ORDINAL_FLAG);
-				}
-				else {
-					// Imported by name
-					auto func = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(base + rvaToFo(pThunk->u1.Function));
-					spdlog::debug("\tImported by name: {} and hint: {}.", func->Name, func->Hint);
-					data.ByName.Hint = func->Hint;
-					data.ByName.Name = func->Name;
-				}
+			if (pImport->OriginalFirstThunk) {
+				spdlog::debug("\tImport lookup table:");
+				auto pIlt = reinterpret_cast<PIMAGE_THUNK_DATA>(base + rvaToFo(pImport->OriginalFirstThunk));
+				while (pIlt->u1.Function) {
+					Import data{};
+					if (FlagOn(pIlt->u1.Function, IMAGE_ORDINAL_FLAG)) {
+						// Imported by ordinal
+						spdlog::debug("\t\tImported by ordinal: 0x{:x}.", ClearFlag(pIlt->u1.Ordinal, IMAGE_ORDINAL_FLAG));
+					}
+					else {
+						// Imported by name
+						auto func = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(base + rvaToFo(pIlt->u1.Function));
+						spdlog::debug("\t\tImported by name: {} and hint: {}.", func->Name, func->Hint);
+						data.ByName.Hint = func->Hint;
+						data.ByName.Name = func->Name;
+					}
 
-				data.Thunk = *pThunk;
-				entry.Table.emplace_back(std::move(data));
-				pThunk++;
+					data.Ordinal = pIlt->u1.Function;
+					entry.Ilt.emplace_back(std::move(data));
+					pIlt++;
+				}
 			}
+			else if (pImport->FirstThunk) {
+				spdlog::debug("\tImport address table:");
+				auto pIat = reinterpret_cast<PIMAGE_THUNK_DATA>(base + rvaToFo(pImport->FirstThunk));
+				while (pIat->u1.Function) {
+					Import data{};
+					if (pIat->u1.Function & IMAGE_ORDINAL_FLAG) {
+						// Imported by ordinal
+						spdlog::debug("\t\tImported by ordinal: 0x{:x}.", ClearFlag(pIat->u1.Ordinal, IMAGE_ORDINAL_FLAG));
+					}
+					else {
+						// Imported by name
+						auto func = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(base + rvaToFo(pIat->u1.Function));
+						spdlog::debug("\t\tImported by name: {} and hint: {}.", func->Name, func->Hint);
+						data.ByName.Hint = func->Hint;
+						data.ByName.Name = func->Name;
+					}
+
+					data.Ordinal = pIat->u1.Function;
+					entry.Iat.emplace_back(std::move(data));
+					pIat++;
+				}
+			}
+			else spdlog::warn("No import was found in the file.");
 
 			ret.emplace_back(std::move(entry));
 			pImport++;
@@ -398,102 +425,124 @@ namespace PeMaster {
 			Imports& imports
 		)
 	{
+		// TODO: Not implemented
+
+		/*
 		// TODO: Support forwarder chain
+
+		// Get information
+		auto& importDir = getNtHeaders().getOptionalHeader().DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+		auto& rva = importDir.VirtualAddress;
+		auto& size = importDir.Size;
+
+		// Total size of the section
+		size_t totalSize = 0;
+		// Add size of IMAGE_IMPORT_DESCRIPTORs without name, plus 1 indicates a null terminator
+		totalSize += (imports.size() + 1) * sizeof(IMAGE_IMPORT_DESCRIPTOR);
+		// Dll names position
+		auto posDllNames = totalSize;
+
+		// Calculate size of dll names
+		for (const auto& imp : imports) {
+			// Plus 1 indicates a null terminator
+			totalSize += imp.DllName.size() + 1;
+		}
+		// Iat position
+		auto posIat = totalSize;
+
+		// Calculate size of iat without name
+		for (const auto& imp : imports) {
+			auto& usingTable = imp.Iat.size() ? imp.Iat : imp.Ilt;
+
+			totalSize += (usingTable.size() + imports.size()) * sizeof(IMAGE_THUNK_DATA);
+		}
+		// Ilt position
+		auto posIlt = totalSize;
+
+		// Calculate size of ilt without name
+		for (const auto& imp : imports) {
+			auto& usingTable = imp.Iat.size() ? imp.Iat : imp.Ilt;
+
+			totalSize += (usingTable.size() + imports.size()) * sizeof(IMAGE_THUNK_DATA);
+		}
+		// Iat names position
+		auto posIatNames = totalSize;
+
+		// Calculate size of iat by name
+		for (const auto& imp : imports) {
+			auto& usingTable = imp.Iat.size() ? imp.Iat : imp.Ilt;
+			for (const auto& entry : usingTable) {
+				if (!FlagOn(entry.Ordinal, IMAGE_ORDINAL_FLAG)) {
+					// Add size of hint
+					totalSize += sizeof(WORD);
+					// Plus 2 indicates a null terminator and a padding
+					totalSize += entry.ByName.Name.size() + 2;
+				}
+			}
+		}
+
+		size = totalSize;
+		totalSize = align_up(totalSize, getNtHeaders().getOptionalHeader().FileAlignment);
 		// Generate a new section
 		SectionHeader secImport;
 		auto& secAdded = getSectionHeaders().emplace_back(secImport);
 		// Set name
 		secAdded.Name[0] = '.';
 		secAdded.Name[1] = 'i';
-
-		// Get information
+		secAdded.Characteristics = IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE | IMAGE_SCN_CNT_INITIALIZED_DATA;
 		auto& content = secAdded.m_content;
-		auto& importDir = getNtHeaders().getOptionalHeader().DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
-		auto& rva = importDir.VirtualAddress;
-		auto& size = importDir.Size;
-
-		// Get size
-		uint64_t sizeOfDescriptors = imports.size() * sizeof(IMAGE_IMPORT_DESCRIPTOR);
-		uint64_t sizeOfNames = 0;
-		uint64_t sizeOfByNames = 0;
-		uint64_t sizeOfThunks = 0;
-
-		for (const auto& entry : imports) {
-			sizeOfNames += entry.DllName.size() + 1;
-			sizeOfThunks += sizeof(IMAGE_THUNK_DATA) * entry.Table.size();
-
-			for (const auto& imp : entry.Table) {
-				// Filter functions imported by name
-				if ((imp.Thunk.u1.Function & IMAGE_ORDINAL_FLAG) == 0) {
-					sizeOfByNames += imp.ByName.Name.size() + 1 + sizeof(WORD);
-				}
-			}
-		}
-
-		sizeOfDescriptors += sizeof(IMAGE_IMPORT_DESCRIPTOR);
-		sizeOfThunks += imports.size() * sizeof(IMAGE_THUNK_DATA);
-
-		auto total = sizeOfDescriptors + sizeOfNames + sizeOfByNames + sizeOfThunks * 2;
-		auto totalFAligned = align_up(total, getNtHeaders().getOptionalHeader().FileAlignment);
-		auto totalSAligned = align_up(total, getNtHeaders().getOptionalHeader().SectionAlignment);
-		content.resize(totalFAligned);
-		secAdded.SizeOfRawData = totalFAligned;
-		secAdded.Misc.VirtualSize = totalSAligned;
-
-		rebuild();
+		secAdded.Misc.VirtualSize = totalSize;
+		content.resize(totalSize);
+		updateHeaders();
 		rva = secAdded.VirtualAddress;
-		size = total;
 
 		auto pDescriptorStart = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(content.data());
-		for (const auto& entry : imports) {
-			pDescriptorStart->ForwarderChain = 0;
-			pDescriptorStart->TimeDateStamp = entry.TimeDateStamp;
+		auto pDllNamesStart = content.data() + posDllNames;
+		auto pIat = reinterpret_cast<PIMAGE_THUNK_DATA>(content.data() + posIat);
+		auto pIlt = reinterpret_cast<PIMAGE_THUNK_DATA>(content.data() + posIlt);
+		auto pIatNamesStart = content.data() + posIatNames;
+
+		for (const auto& imp : imports) {
+			auto& usingTable = imp.Iat.size() ? imp.Iat : imp.Ilt;
+
+			// Copy iat and ilt
+			pDescriptorStart->FirstThunk = reinterpret_cast<uint8_t*>(pIat) - content.data() + rva;
+			pDescriptorStart->OriginalFirstThunk = reinterpret_cast<uint8_t*>(pIlt) - content.data() + rva;
+			for (const auto& entry : usingTable) {
+				// Copy iat content
+				pIat->u1.Ordinal = pIatNamesStart - content.data() + rva;
+				pIat++;
+				// Copy ilt content
+				pIlt->u1.Ordinal = pIatNamesStart - content.data() + rva;
+				pIlt++;
+
+				// Copy iat import by name
+				if (!FlagOn(entry.Ordinal, IMAGE_ORDINAL_FLAG)) {
+					*reinterpret_cast<WORD*>(pIatNamesStart) = entry.ByName.Hint;
+					pIatNamesStart += sizeof(WORD);
+					std::copy(entry.ByName.Name.cbegin(), entry.ByName.Name.cend(), pIatNamesStart);
+					pIatNamesStart += entry.ByName.Name.size() + 1;
+					if ((pIatNamesStart - content.data() + secAdded.PointerToRawData) % 2) pIatNamesStart++;
+				}
+				else {
+					SetFlag(pIat->u1.Ordinal, IMAGE_ORDINAL_FLAG);
+					SetFlag(pIlt->u1.Ordinal, IMAGE_ORDINAL_FLAG);
+				}
+			}
+			pIat++;
+			pIlt++;
+
+			// Copy dll name
+			pDescriptorStart->Name = pDllNamesStart - content.data() + rva;
+			std::copy(imp.DllName.cbegin(), imp.DllName.cend(), pDllNamesStart);
+			pDllNamesStart += imp.DllName.size() + 1;
+
+			pDescriptorStart->ForwarderChain = imp.ForwarderChain;
+			pDescriptorStart->TimeDateStamp = imp.TimeDateStamp;
 
 			pDescriptorStart++;
 		}
-
-		size_t i = 0;
-		pDescriptorStart = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(content.data());
-		auto pDllNameStart = content.data() + sizeOfDescriptors + sizeOfThunks * 2;
-		for (const auto& entry : imports) {
-			pDescriptorStart[i].Name = pDllNameStart - content.data() + rva;
-			std::copy(entry.DllName.cbegin(), entry.DllName.cend(), pDllNameStart);
-			pDllNameStart += entry.DllName.size() + 1;
-
-			i++;
-		}
-
-		i = 0;
-		size_t j = 0;
-		pDescriptorStart = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(content.data());
-		auto pThunkStart = reinterpret_cast<PIMAGE_THUNK_DATA>(content.data() + sizeOfDescriptors);
-		auto pOThunkStart = reinterpret_cast<PIMAGE_THUNK_DATA>(content.data() + sizeOfDescriptors + sizeOfThunks);
-		auto pByNameStart = content.data() + sizeOfDescriptors + sizeOfThunks * 2 + sizeOfNames;
-		for (const auto& entry : imports) {
-			pDescriptorStart[i].FirstThunk = reinterpret_cast<uint8_t*>(&pThunkStart[j]) - content.data() + rva;
-			//pDescriptorStart[i].OriginalFirstThunk = reinterpret_cast<uint8_t*>(&pOThunkStart[j]) - content.data() + rva;
-			for (const auto& imp : entry.Table) {
-				// Filter functions imported by name
-				if ((imp.Thunk.u1.Function & IMAGE_ORDINAL_FLAG) == 0) {
-					pThunkStart[j].u1.Function = pByNameStart - content.data() + rva;
-					//pOThunkStart[j].u1.Function = pByNameStart - content.data() + rva;
-
-					*reinterpret_cast<WORD*>(pByNameStart) = imp.ByName.Hint;
-					memcpy(pByNameStart + sizeof(WORD), imp.ByName.Name.data(), imp.ByName.Name.size());
-					//pByNameStart += sizeof(WORD) + imp.ByName.Name.size() + 1;
-					pByNameStart += sizeof(WORD) + imp.ByName.Name.size();
-					//if (reinterpret_cast<uint64_t>(pByNameStart) % 2 != 0) pByNameStart++;
-
-					j++;
-				}
-			}
-
-			// Leave a blank thunk
-			j++;
-			i++;
-		}
-
-		rebuild();
+		*/
 	}
 
 	size_t
@@ -554,7 +603,9 @@ namespace PeMaster {
 			posContentRva = align_up(static_cast<size_t>(rSection.VirtualAddress) + rSection.Misc.VirtualSize, rOptionalHeader.SectionAlignment);
 
 			// Check if the section has code attribute and add to size of code
-			if (rSection.Characteristics & IMAGE_SCN_CNT_CODE) sizeOfCode += rSection.Misc.VirtualSize;
+			if (rSection.Characteristics & IMAGE_SCN_CNT_CODE ||
+				rSection.Characteristics & IMAGE_SCN_MEM_EXECUTE)
+				sizeOfCode += rSection.Misc.VirtualSize;
 			// Check if the section has initialized data attribute and add to size of initialized data
 			if (rSection.Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) sizeOfInitedData += rSection.Misc.VirtualSize;
 			// Check if the section has code attribute and add to size of code
@@ -574,7 +625,7 @@ namespace PeMaster {
 		// Update section numbers
 		rFileHeader.NumberOfSections = rSectionHeaders.size();
 
-		// Update checksum
+		// TODO: Update checksum
 
 		return totalSize;
 	}
@@ -643,9 +694,9 @@ namespace PeMaster {
 	//	Offset Translate
 	//
 
-	uint64_t
+	size_t
 		Pe::vaToRva(
-			uint64_t va
+			size_t va
 		)
 	{
 		auto vaEntry = getNtHeaders().getOptionalHeader().AddressOfEntryPoint;
@@ -657,9 +708,9 @@ namespace PeMaster {
 		return va - vaEntry;
 	}
 
-	uint64_t
+	size_t
 		Pe::rvaToVa(
-			uint64_t rva
+			size_t rva
 		)
 	{
 		auto vaEntry = getNtHeaders().getOptionalHeader().AddressOfEntryPoint;
@@ -667,9 +718,9 @@ namespace PeMaster {
 		return rva + vaEntry;
 	}
 
-	uint64_t
+	size_t
 		Pe::foToRva(
-			uint64_t fo
+			size_t fo
 		)
 	{
 		auto& sec = getSectionByFo(fo);
@@ -677,9 +728,9 @@ namespace PeMaster {
 		return fo - sec.PointerToRawData + sec.VirtualAddress;
 	}
 
-	uint64_t
+	size_t
 		Pe::rvaToFo(
-			uint64_t rva
+			size_t rva
 		)
 	{
 		auto& sec = getSectionByRva(rva);
@@ -687,9 +738,9 @@ namespace PeMaster {
 		return rva - sec.VirtualAddress + sec.PointerToRawData;
 	}
 
-	uint64_t
+	size_t
 		Pe::foToVa(
-			uint64_t fo
+			size_t fo
 		)
 	{
 		auto& sec = getSectionByFo(fo);
@@ -697,9 +748,9 @@ namespace PeMaster {
 		return rvaToVa(fo - sec.PointerToRawData + sec.VirtualAddress);
 	}
 
-	uint64_t
+	size_t
 		Pe::vaToFo(
-			uint64_t va
+			size_t va
 		)
 	{
 		auto& sec = getSectionByVa(va);
@@ -709,7 +760,7 @@ namespace PeMaster {
 
 	bool
 		Pe::validVa(
-			uint64_t va
+			size_t va
 		)
 	{
 		if (va > getNtHeaders().getOptionalHeader().SizeOfImage) return false;
@@ -719,7 +770,7 @@ namespace PeMaster {
 
 	bool
 		Pe::validRva(
-			uint64_t rva
+			size_t rva
 		)
 	{
 		if (vaToRva(rva) > getNtHeaders().getOptionalHeader().SizeOfImage) return false;
@@ -729,7 +780,7 @@ namespace PeMaster {
 
 	bool
 		Pe::validFo(
-			uint64_t fo
+			size_t fo
 		)
 	{
 		if (fo > m_buffer.size()) return false;
@@ -744,7 +795,7 @@ namespace PeMaster {
 	{
 		static const uint16_t posChecksum = 64;
 		static const uint32_t top = 0xFFFFFFFF;
-		uint64_t checksum = 0;
+		size_t checksum = 0;
 		auto base = m_buffer.data();
 		for (size_t i = 0; i < m_buffer.size(); i += sizeof(uint32_t))
 		{

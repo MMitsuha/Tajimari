@@ -8,11 +8,14 @@ namespace PeMaster {
 		public IMAGE_OPTIONAL_HEADER
 	{
 	public:
-		OptionalHeader() = default;
-		OptionalHeader(
-			size_t offset,
-			size_t size
-		);
+		explicit
+			OptionalHeader() = default;
+
+		explicit
+			OptionalHeader(
+				size_t offset,
+				size_t size
+			);
 
 		void
 			open(

@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rd_party", "3rd_party", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShellcodeTemplate", "ShellcodeTemplate\ShellcodeTemplate.vcxproj", "{3798D14C-B7FA-4C18-9693-AD45318E1BF4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestTarget", "TestTarget\TestTarget.vcxproj", "{37DB55A3-C325-4F58-9A6D-289581A3B26B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -44,6 +46,14 @@ Global
 		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Release|x64.Build.0 = Release|x64
 		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Release|x86.ActiveCfg = Release|Win32
 		{3798D14C-B7FA-4C18-9693-AD45318E1BF4}.Release|x86.Build.0 = Release|Win32
+		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Debug|x64.ActiveCfg = Debug|x64
+		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Debug|x64.Build.0 = Debug|x64
+		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Debug|x86.ActiveCfg = Debug|Win32
+		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Debug|x86.Build.0 = Debug|Win32
+		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Release|x64.ActiveCfg = Release|x64
+		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Release|x64.Build.0 = Release|x64
+		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Release|x86.ActiveCfg = Release|Win32
+		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

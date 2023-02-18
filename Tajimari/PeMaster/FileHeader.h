@@ -8,10 +8,13 @@ namespace PeMaster {
 		public IMAGE_FILE_HEADER
 	{
 	public:
-		FileHeader() = default;
-		FileHeader(
-			size_t offset
-		);
+		explicit
+			FileHeader() = default;
+
+		explicit
+			FileHeader(
+				size_t offset
+			);
 
 		void
 			open(

@@ -10,7 +10,8 @@ namespace PeMaster {
 		public IMAGE_DOS_HEADER
 	{
 	public:
-		DosHeader();
+		explicit
+			DosHeader();
 
 		void
 			open(

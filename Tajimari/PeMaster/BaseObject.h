@@ -9,11 +9,13 @@ namespace PeMaster {
 	class BaseObject
 	{
 	public:
-		BaseObject() = default;
+		explicit
+			BaseObject() = default;
 
-		BaseObject(
-			const std::filesystem::path& path
-		);
+		explicit
+			BaseObject(
+				const std::filesystem::path& path
+			);
 
 		bool
 			open(

@@ -11,10 +11,13 @@ namespace PeMaster {
 		private OptionalHeader
 	{
 	public:
-		NtHeaders() = default;
-		NtHeaders(
-			uint32_t offset
-		);
+		explicit
+			NtHeaders() = default;
+
+		explicit
+			NtHeaders(
+				uint32_t offset
+			);
 
 		void
 			open(

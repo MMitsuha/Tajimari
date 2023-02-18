@@ -27,10 +27,13 @@ namespace PeMaster {
 		public IMAGE_SECTION_HEADER
 	{
 	public:
-		SectionHeader() = default;
-		SectionHeader(
-			size_t offset
-		);
+		explicit
+			SectionHeader() = default;
+
+		explicit
+			SectionHeader(
+				size_t offset
+			);
 
 		void
 			open(
@@ -104,7 +107,7 @@ namespace PeMaster {
 		virtual
 			~SectionHeader() = default;
 
-		Buffer m_content;
+		Buffer m_content{};
 
 	private:
 		void
