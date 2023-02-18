@@ -1,0 +1,3 @@
+[submodule "3rd_party/libpepp"]
+	path = 3rd_party/libpepp
+	url = https://github.com/caizhe666/libpepp.git
