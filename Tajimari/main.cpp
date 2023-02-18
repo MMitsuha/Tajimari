@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "PeMaster/PeMaster.h"
+#include "libpepp.h"
 
 int
 wmain(
@@ -16,8 +16,8 @@ wmain(
 	//std::string pathTarget = R"(E:\upx\upx.exe)";
 	std::string pathTarget = R"(.\TestTarget.exe)";
 	//std::string pathTarget = R"(E:\dllexp-x64\dllexp.exe)";
-	PeMaster::Pe objTemplate(pathTemplate);
-	PeMaster::Pe objTarget(pathTarget);
+	libpepp::Pe objTemplate(pathTemplate);
+	libpepp::Pe objTarget(pathTarget);
 
 	auto checksum = objTarget.computeChecksum();
 	spdlog::debug("Target checksum: 0x{:x}", checksum);
