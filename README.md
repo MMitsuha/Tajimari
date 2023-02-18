@@ -18,11 +18,11 @@ the Open Source and Pure C++ Packer for eXecutables.
 
 ### Tajimari Main
 
-The main program, contains `PeMaster`, which is the core of `Tajimari`, providing function like: PE parse, rebuild and etc.
+The main program, contains `libpepp`, which is the core of `Tajimari`, providing function like: PE parse, rebuild and etc.
 
 Pack a program and inject `ShellcodeTemplate` into it.
 
-### PeMaster
+### libpepp
 
 The PE lib providing parse, rebuild function
 
