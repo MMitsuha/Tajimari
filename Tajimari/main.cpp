@@ -22,8 +22,10 @@ wmain(
 	auto checksum = objTarget.computeChecksum();
 	spdlog::debug("Target checksum: 0x{:x}", checksum);
 
+	/*
 	auto imports = objTarget.enumImport();
 	objTarget.setImport(imports);
+	*/
 
 	/*
 	// Get and copy the section
