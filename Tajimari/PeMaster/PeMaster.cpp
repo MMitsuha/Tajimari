@@ -70,7 +70,7 @@ namespace PeMaster {
 	bool
 		Pe::isValid(
 			void
-		)
+		) const
 	{
 		return m_valid;
 	}
@@ -162,37 +162,12 @@ namespace PeMaster {
 	//	Pe read: enumerate data dictionary
 	//
 
-	Pe::Exports
+	ExportTable
 		Pe::enumExport(
 			void
 		)
 	{
-		Exports ret;
-		auto importDir = getNtHeaders().getOptionalHeader().DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-		auto rva = importDir.VirtualAddress;
-		auto size = importDir.Size;
-
-		if (rva == 0) {
-			return {};
-		}
-
-		auto base = m_buffer.data();
-		auto pExport = reinterpret_cast<PIMAGE_EXPORT_DIRECTORY>(base + rvaToFo(rva));
-		auto tableName = reinterpret_cast<uint32_t*>(base + rvaToFo(pExport->AddressOfNames));
-		auto tableAddr = reinterpret_cast<uint32_t*>(base + rvaToFo(pExport->AddressOfFunctions));
-		auto tableOrdName = reinterpret_cast<uint16_t*>(base + rvaToFo(pExport->AddressOfNameOrdinals));
-		auto baseOrdinal = pExport->Base;
-
-		for (size_t i = 0; i < pExport->NumberOfFunctions; i++) {
-			std::string funcName = reinterpret_cast<char*>(base + rvaToFo(tableName[i]));
-			auto funcOrd = tableOrdName[i] + baseOrdinal;
-			auto funcRvaAddr = tableAddr[i];
-			ret.emplace_back(funcOrd, funcName, funcRvaAddr);
-
-			spdlog::debug("Ordinal: {}, name: {}, rva: 0x{:x}.", funcOrd, funcName, funcRvaAddr);
-		}
-
-		return ret;
+		return ExportTable(*this);
 	}
 
 	Pe::Imports

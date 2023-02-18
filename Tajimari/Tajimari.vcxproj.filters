@@ -19,6 +19,12 @@
     <Filter Include="头文件\PeMaster">
       <UniqueIdentifier>{228f3ddd-1e64-42b4-85c4-c09f64f99299}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\PeMaster\Details">
+      <UniqueIdentifier>{84f336b5-b3ab-446e-ad51-af31036efb43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\PeMaster\Details">
+      <UniqueIdentifier>{6b2750aa-bd0d-4321-950f-c1f915553357}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -48,6 +54,9 @@
     <ClCompile Include="PeMaster\SectionHeader.cpp">
       <Filter>源文件\PeMaster</Filter>
     </ClCompile>
+    <ClCompile Include="PeMaster\Details\ExportTable.cpp">
+      <Filter>源文件\PeMaster\Details</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -76,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="PeMaster\SectionHeader.h">
       <Filter>头文件\PeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="PeMaster\Details\ExportTable.h">
+      <Filter>头文件\PeMaster\Details</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

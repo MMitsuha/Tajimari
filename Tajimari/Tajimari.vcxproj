@@ -208,6 +208,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PeMaster\BaseObject.cpp" />
+    <ClCompile Include="PeMaster\Details\ExportTable.cpp" />
     <ClCompile Include="PeMaster\DosHeader.cpp" />
     <ClCompile Include="PeMaster\FileHeader.cpp" />
     <ClCompile Include="PeMaster\NtHeaders.cpp" />
@@ -229,6 +230,7 @@
   <ItemGroup>
     <ClInclude Include="main.h" />
     <ClInclude Include="PeMaster\BaseObject.h" />
+    <ClInclude Include="PeMaster\Details\ExportTable.h" />
     <ClInclude Include="PeMaster\DosHeader.h" />
     <ClInclude Include="PeMaster\FileHeader.h" />
     <ClInclude Include="PeMaster\NtHeaders.h" />

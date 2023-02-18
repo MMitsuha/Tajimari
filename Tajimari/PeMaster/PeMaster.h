@@ -8,6 +8,8 @@
 #include "NtHeaders.h"
 #include "SectionHeader.h"
 
+#include "Details/ExportTable.h"
+
 //
 //  These macros are used to test, set and clear flags respectivly
 //
@@ -53,7 +55,7 @@ namespace PeMaster {
 		bool
 			isValid(
 				void
-			);
+			) const;
 
 		DosHeader&
 			getDosHeader(
@@ -99,14 +101,7 @@ namespace PeMaster {
 		//	Pe read: enumerate data dictionary
 		//
 
-		using Export = struct _EXPORT {
-			uint32_t Ordinal = 0;
-			std::string Name;
-			uint32_t Rva = 0;
-		};
-
-		using Exports = std::vector<Export>;
-		Exports
+		ExportTable
 			enumExport(
 				void
 			);
@@ -296,10 +291,21 @@ namespace PeMaster {
 		virtual
 			~Pe() = default;
 
+		friend ExportTable;
+
 	private:
 		void
 			open(
 				void
 			);
+
+		inline
+			Buffer&
+			getBuffer(
+				void
+			)
+		{
+			return m_buffer;
+		}
 	};
 }
