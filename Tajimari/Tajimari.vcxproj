@@ -73,22 +73,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-    <IncludePath>$(SolutionDir)3rd_party\libpepp\libpepp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)3rd_party\libpebliss\pe_lib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-    <IncludePath>$(SolutionDir)3rd_party\libpepp\libpepp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)3rd_party\libpebliss\pe_lib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-    <IncludePath>$(SolutionDir)3rd_party\libpepp\libpepp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)3rd_party\libpebliss\pe_lib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-    <IncludePath>$(SolutionDir)3rd_party\libpepp\libpepp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)3rd_party\libpebliss\pe_lib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
@@ -119,7 +119,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\libpepp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\pe_bliss.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>
       </HeapReserveSize>
     </Link>
@@ -146,7 +146,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\libpepp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\pe_bliss.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>
       </HeapReserveSize>
     </Link>
@@ -169,7 +169,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\libpepp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\pe_bliss.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>
       </HeapReserveSize>
     </Link>
@@ -196,7 +196,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\libpepp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\pe_bliss.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>
       </HeapReserveSize>
     </Link>

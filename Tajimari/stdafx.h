@@ -8,8 +8,10 @@
 #include <string>
 #include <list>
 #include <random>
+#include <fstream>
 #include <Windows.h>
 #include <conio.h>
 #include <winternl.h>
 
 #include <spdlog/spdlog.h>
+#include "pe_bliss.h"

@@ -5,9 +5,9 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tajimari", "Tajimari\Tajimari.vcxproj", "{31A0D9B5-0D4C-4CCF-A615-EC446580A459}"
 	ProjectSection(ProjectDependencies) = postProject
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035} = {1461F543-D1FA-4E4C-B6D7-0F879F566035}
 		{3798D14C-B7FA-4C18-9693-AD45318E1BF4} = {3798D14C-B7FA-4C18-9693-AD45318E1BF4}
 		{37DB55A3-C325-4F58-9A6D-289581A3B26B} = {37DB55A3-C325-4F58-9A6D-289581A3B26B}
-		{39422669-4D7B-447C-A917-996BF896EFF7} = {39422669-4D7B-447C-A917-996BF896EFF7}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{6F0235C1-F2B4-419E-BE6F-6FB2D1E407E3}"
@@ -24,7 +24,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShellcodeTemplate", "Shellc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestTarget", "TestTarget\TestTarget.vcxproj", "{37DB55A3-C325-4F58-9A6D-289581A3B26B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpepp", "3rd_party\libpepp\libpepp\libpepp.vcxproj", "{39422669-4D7B-447C-A917-996BF896EFF7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pe_bliss", "3rd_party\libpebliss\pe_lib\pe_lib.vcxproj", "{1461F543-D1FA-4E4C-B6D7-0F879F566035}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,20 +58,20 @@ Global
 		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Release|x64.Build.0 = Release|x64
 		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Release|x86.ActiveCfg = Release|Win32
 		{37DB55A3-C325-4F58-9A6D-289581A3B26B}.Release|x86.Build.0 = Release|Win32
-		{39422669-4D7B-447C-A917-996BF896EFF7}.Debug|x64.ActiveCfg = Debug|x64
-		{39422669-4D7B-447C-A917-996BF896EFF7}.Debug|x64.Build.0 = Debug|x64
-		{39422669-4D7B-447C-A917-996BF896EFF7}.Debug|x86.ActiveCfg = Debug|Win32
-		{39422669-4D7B-447C-A917-996BF896EFF7}.Debug|x86.Build.0 = Debug|Win32
-		{39422669-4D7B-447C-A917-996BF896EFF7}.Release|x64.ActiveCfg = Release|x64
-		{39422669-4D7B-447C-A917-996BF896EFF7}.Release|x64.Build.0 = Release|x64
-		{39422669-4D7B-447C-A917-996BF896EFF7}.Release|x86.ActiveCfg = Release|Win32
-		{39422669-4D7B-447C-A917-996BF896EFF7}.Release|x86.Build.0 = Release|Win32
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035}.Debug|x64.ActiveCfg = Debug|x64
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035}.Debug|x64.Build.0 = Debug|x64
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035}.Debug|x86.ActiveCfg = Debug|Win32
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035}.Debug|x86.Build.0 = Debug|Win32
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035}.Release|x64.ActiveCfg = Release|x64
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035}.Release|x64.Build.0 = Release|x64
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035}.Release|x86.ActiveCfg = Release|Win32
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{39422669-4D7B-447C-A917-996BF896EFF7} = {29616CA4-F8AC-4C03-915C-1A4237940A25}
+		{1461F543-D1FA-4E4C-B6D7-0F879F566035} = {29616CA4-F8AC-4C03-915C-1A4237940A25}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F0640BD-1A8E-463E-BA0E-9248D334BE54}
