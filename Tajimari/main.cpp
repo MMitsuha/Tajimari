@@ -59,11 +59,29 @@ wmain(
 		}
 	}
 
+	pe_bliss::imported_functions_list imports = get_imported_functions(objTarget);
+	pe_bliss::import_library newLib;
+	pe_bliss::imported_function validFunc;
+	newLib.set_name("Plugin.dll");
+	validFunc.set_name("ValidTajimariDll");
+	validFunc.set_iat_va(0x1);
+	newLib.add_import(validFunc);
+	imports.push_back(newLib);
+
+	pe_bliss::section newImports;
+	newImports.get_raw_data().resize(1);
+	newImports.set_name("newImp");
+	newImports.readable(true).writeable(true);
+	pe_bliss::section& attachedSection = objTarget.add_section(newImports);
+
+	pe_bliss::rebuild_imports(objTarget, imports, attachedSection, pe_bliss::import_rebuilder_settings(true, false));
+
 	// Create a new PE file
 	std::ofstream fileNew(R"(.\Modified.exe)", std::ios::out | std::ios::binary | std::ios::trunc);
 
 	// Rebuild PE file
 	pe_bliss::rebuild_pe(objTarget, fileNew);
+	fileNew.close();
 
 	STARTUPINFOW si{};
 	PROCESS_INFORMATION pi{};
@@ -75,7 +93,7 @@ wmain(
 		CloseHandle(pi.hThread);
 	}
 	else
-		spdlog::error("Error starting Modified.exe, error code: 0x{:x}", GetLastError());
+		spdlog::error("Error starting Modified.exe, error code: {}", GetLastError());
 
 	return 0;
 }
