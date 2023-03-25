@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
+#include <unordered_set>
 #include <string>
 #include <list>
 #include <random>
@@ -12,6 +14,8 @@
 #include <Windows.h>
 #include <conio.h>
 #include <winternl.h>
+#include <algorithm>
+#include <functional>
 
 #include <spdlog/spdlog.h>
 #include "pe_bliss.h"
