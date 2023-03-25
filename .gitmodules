@@ -1,3 +1,3 @@
 [submodule "3rd_party/libpebliss"]
 	path = 3rd_party/libpebliss
-	url = https://github.com/caizhe666/libpebliss
+	url = https://github.com/caizhe666/libpebliss.git
